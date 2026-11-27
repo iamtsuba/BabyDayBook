@@ -194,7 +194,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1422';
+const APP_VERSION='26.11.27.1428';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -844,8 +844,18 @@ function openAccount(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();S.deferredPrompt=e});
 
 /* ───────── Événements de la page ───────── */
+let quickBusy=false;
 async function quickAction(type){
   const run=S.running.find(r=>r.type===type);
+  if(type==='sommeil'){
+    // Un appui démarre le sommeil, le suivant le termine (modification possible depuis la liste).
+    if(quickBusy)return;quickBusy=true;
+    try{
+      if(run){const d=Date.now()-Date.parse(run.started_at);await finishEvent(run);toast(`Réveil · a dormi ${fmtHM(d)}`)}
+      else{const row=await insertEvent({type:'sommeil',started_at:new Date().toISOString(),ended_at:null});if(row){await loadAll();toast('Sommeil démarré 🌙')}}
+    }finally{quickBusy=false}
+    return;
+  }
   openEvent(type,run||null);
 }
 async function sideToggle(e,side){
