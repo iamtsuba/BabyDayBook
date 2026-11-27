@@ -194,7 +194,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1210';
+const APP_VERSION='26.11.27.1422';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -308,6 +308,52 @@ function dbErr(error){
   else toast('Erreur : '+m);
 }
 
+/* ───────── Notifications des chronos ───────── */
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open('bdb',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function kvSet(k,v){const db=await idbOpen();return new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})}
+// Le service worker n'a pas accès à la session : on lui donne le jeton pour qu'il puisse agir depuis la notification.
+async function syncAuthToSW(session){
+  try{await kvSet('auth',session?{url:SUPABASE_URL,key:SUPABASE_KEY,access_token:session.access_token,expires_at:session.expires_at,user_id:session.user&&session.user.id}:null)}catch(e){}
+}
+async function swPost(msg){
+  try{
+    if(!('serviceWorker' in navigator))return;
+    const reg=await navigator.serviceWorker.ready,w=reg.active||navigator.serviceWorker.controller;
+    if(w)w.postMessage(msg);
+  }catch(e){}
+}
+const notifOK=()=>'Notification' in window&&Notification.permission==='granted';
+function notifSync(){if(notifOK()&&S.child)swPost({type:'sync',events:S.running,child:S.child.name})}
+function askNotif(){
+  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(notifSync)}catch(e){}
+}
+function notifLabel(){
+  if(!('Notification' in window))return'🔕 Notifications indisponibles';
+  const p=Notification.permission;
+  return p==='granted'?'🔔 Notifications activées · envoyer un test':p==='denied'?'🔕 Notifications bloquées (réglages du site)':'🔔 Activer les notifications';
+}
+async function notifButton(btn){
+  if(!('Notification' in window)){toast(isIOS()&&!isStandalone()?"Sur iPhone, installe d'abord l'app sur l'écran d'accueil":'Notifications indisponibles sur cet appareil');return}
+  if(Notification.permission==='default'){await Notification.requestPermission();btn.textContent=notifLabel();notifSync();return}
+  if(Notification.permission==='denied'){toast("Autorise les notifications dans les réglages du site ou de l'application");return}
+  try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('Baby Day Book',{body:'Les notifications fonctionnent ✅',icon:'icon-192.png',badge:'badge.png',tag:'bdb-test'})}catch(e){toast('Erreur : '+e.message)}
+}
+let actionHandled=false;
+async function handleNotifAction(act,id){
+  for(let i=0;i<30&&!S.child;i++)await new Promise(r=>setTimeout(r,300));
+  if(!S.child)return;
+  await loadAll();
+  const e=S.running.find(x=>x.id===id);
+  if(e){
+    if(act==='finish')await finishEvent(e);
+    else if(e.type==='allaitement'){
+      const side=act==='switch'?(e.active_side==='left'?'right':'left'):act==='pause'?e.active_side:act;
+      if(side)await sideToggle(e,side);
+    }
+  }
+  try{history.replaceState(null,'',location.pathname)}catch(_){}
+}
+
 /* ───────── Accès données ───────── */
 async function insertEvent(row){
   const{data,error}=await sb.from('babydaybook_events').insert({...row,child_id:S.child.id}).select().single();
@@ -351,6 +397,7 @@ async function loadAll(){
   for(const x of S.running)if(!evs.some(e=>e.id===x.id)&&Date.parse(x.started_at)<r.end)evs.push(x);
   S.events=evs.filter(e=>overlaps(e,r)).sort((a,b)=>Date.parse(b.started_at)-Date.parse(a.started_at));
   render();
+  notifSync();
 }
 
 /* ───────── Rendu ───────── */
@@ -777,6 +824,7 @@ const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||
 function openAccount(){
   const body=`<p class="info">Connecté : <b style="color:var(--text)">${esc(S.user&&S.user.email||'')}</b></p>
     <button class="btn ghost" data-m="install" style="width:100%;margin-bottom:10px">📲 Installer l'application</button>
+    <button class="btn ghost" data-m="notif" style="width:100%;margin-bottom:10px">${notifLabel()}</button>
     <div id="iosHelp" class="info hide">Sur iPhone : touche <b>Partager</b> (carré avec une flèche) puis <b>Sur l'écran d'accueil</b>.</div>
     <button class="btn danger" data-m="logout" style="width:100%">Se déconnecter</button>
     <p class="hint" style="text-align:center;margin-top:16px">Baby Day Book · version ${esc(APP_VERSION.indexOf('__')===0?'dev':APP_VERSION)}</p>`;
@@ -784,6 +832,7 @@ function openAccount(){
   ov.addEventListener('click',async ev=>{
     const m=ev.target.closest('[data-m]');if(!m)return;
     if(m.dataset.m==='logout'){closeModal();await sb.auth.signOut()}
+    if(m.dataset.m==='notif')notifButton(m);
     if(m.dataset.m==='install'){
       if(isStandalone()){toast("L'application est déjà installée");return}
       if(S.deferredPrompt){S.deferredPrompt.prompt();S.deferredPrompt=null;return}
@@ -815,10 +864,10 @@ const findEvent=id=>S.events.find(e=>e.id===id)||S.running.find(e=>e.id===id)||S
 $('#view').addEventListener('click',async ev=>{
   const el=ev.target.closest('[data-act]');if(!el)return;
   const act=el.dataset.act,id=el.dataset.id,e=id?findEvent(id):null;
-  if(act==='qa')quickAction(el.dataset.type);
+  if(act==='qa'){if(el.dataset.type==='allaitement'||el.dataset.type==='sommeil')askNotif();quickAction(el.dataset.type)}
   else if(act==='edit'&&e)openEvent(e.type,e);
   else if(act==='del'&&e){ev.stopPropagation();if(confirm('Supprimer cette activité ?')&&await deleteEvent(e.id))await loadAll()}
-  else if(act==='side'&&e){ev.stopPropagation();sideToggle(e,el.dataset.side)}
+  else if(act==='side'&&e){ev.stopPropagation();askNotif();sideToggle(e,el.dataset.side)}
   else if(act==='finish'&&e){ev.stopPropagation();finishEvent(e)}
   else if(act==='prev'){S.day=addDays(S.day,-1);await loadAll()}
   else if(act==='next'&&S.day<todayStr()){S.day=addDays(S.day,1);await loadAll()}
@@ -901,6 +950,8 @@ async function bootApp(){
   $('#app').classList.remove('hide');
   S.day=todayStr();
   await loadAll();
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('act')&&qs.get('id')&&!actionHandled){actionHandled=true;handleNotifAction(qs.get('act'),qs.get('id'))}
 }
 let currentUid=null;
 async function route(user){
@@ -914,8 +965,14 @@ async function init(){
   setSignup(false);
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
   if(!sb){showAuth();return}
-  sb.auth.onAuthStateChange((evt,session)=>{setTimeout(()=>route(session&&session.user||null),0)});
+  if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',ev=>{const m=ev.data||{};if(m.type==='act')handleNotifAction(m.act,m.id)});
+  sb.auth.onAuthStateChange((evt,session)=>{
+    syncAuthToSW(session);
+    if(!session)swPost({type:'clear'});
+    setTimeout(()=>route(session&&session.user||null),0);
+  });
   const{data}=await sb.auth.getSession();
+  syncAuthToSW(data.session);
   await route(data.session&&data.session.user||null);
 }
 init();
