@@ -29,7 +29,7 @@ input,select,textarea{font:inherit;font-size:16px;color:var(--text);background:v
 input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 textarea{resize:none}
 .hide{display:none!important}
-#app{max-width:560px;margin:0 auto;min-height:100dvh;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+#app{max-width:560px;margin:0 auto;min-height:100dvh;padding-bottom:calc(92px + env(safe-area-inset-bottom));overflow-x:hidden}
 
 /* En-tête */
 .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:var(--bg)}
@@ -43,9 +43,9 @@ textarea{resize:none}
 .ibtn:active{background:var(--card)}
 
 /* Actions rapides */
-.quick{display:flex;gap:4px;overflow-x:auto;padding:12px 8px 14px;background:var(--bg2);scrollbar-width:none;border-radius:18px 18px 0 0}
+.quick{display:flex;gap:4px;overflow-x:auto;padding:12px 14px 14px;background:var(--bg2);scrollbar-width:none;border-radius:18px 18px 0 0}
 .quick::-webkit-scrollbar{display:none}
-.qa{flex:0 0 auto;width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.qa{flex:0 0 auto;width:82px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
 .qa .circ{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:27px;background:var(--c);box-shadow:0 2px 10px rgba(0,0,0,.35);transition:transform .12s}
 .qa:active .circ{transform:scale(.92)}
 .qa .stt{font-size:11.5px;font-weight:700;line-height:1.2;min-height:14px;color:var(--text)}
@@ -60,12 +60,43 @@ textarea{resize:none}
 .tdy{font-size:12px;font-weight:700;color:var(--accent);padding:5px 10px;border-radius:999px;background:rgba(61,214,198,.12)}
 
 /* Frise */
-.tl{position:relative;background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.tl{position:relative;background:var(--bg2);border-radius:14px;margin:0 12px;overflow:hidden}
+.tl .in{position:absolute;left:14px;right:14px;top:0;bottom:0}
 .tl .g{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
 .tl .hl{position:absolute;bottom:2px;font-size:10px;color:var(--muted);transform:translateX(-50%)}
-.tl .mk{position:absolute;transform:translateX(-50%);font-size:14px;line-height:1;padding:0}
+.tl .mk{position:absolute;transform:translateX(-50%);line-height:1;padding:0}
 .tl .bar{position:absolute;height:12px;border-radius:3px;min-width:3px;padding:0}
-.tl .now{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);opacity:.7}
+.tl .now{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--accent);opacity:.75}
+
+/* Barre d'onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;pointer-events:none}
+.tabs .tb{pointer-events:auto;display:flex;width:100%;max-width:560px;background:rgba(27,29,33,.97);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:11px;font-weight:700}
+.tabs button.on{color:var(--accent)}
+.ptitle{font-weight:800;font-size:19px;padding:4px 0}
+
+/* Chronologie (semaine) */
+.wknav{display:flex;align-items:center;gap:6px;padding:14px 14px 10px}
+.wknav .ttl{font-weight:700;flex:1;text-align:center}
+.wkgrid{padding:0 12px}
+.wk{display:grid;grid-template-columns:40px 1fr;gap:8px;width:100%;text-align:left;margin-bottom:12px;align-items:start}
+.wk .wl{display:flex;flex-direction:column;align-items:center;padding-top:4px;line-height:1.15;color:var(--muted);font-size:12px;text-transform:uppercase}
+.wk .wl span{font-size:18px;font-weight:800;color:var(--text)}
+.wk .wl.td span{color:var(--accent)}
+.wk .tl{margin:0}
+.wk.fut{opacity:.4}
+.wsum{font-size:12px;color:var(--muted);margin:5px 2px 0;min-height:15px}
+.wax .axis{position:relative;height:16px}
+.wax .axis .in{position:absolute;left:14px;right:14px;top:0;bottom:0}
+.wax .axis span{position:absolute;top:0;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+
+/* Mon compte */
+.sec{padding:14px}
+.sec .sh2{font-weight:800;margin-bottom:10px}
+.kv{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:14px}
+.kv b{color:var(--text);word-break:break-all;text-align:right}
+.sec .btn{width:100%;margin-top:8px}
+.sec input{margin-bottom:0}
 
 /* Cartes */
 .card{background:var(--card);border-radius:14px;margin:12px 12px 0;overflow:hidden}
@@ -146,7 +177,7 @@ textarea{resize:none}
 .authc h1{text-align:center;margin:0 0 4px;font-size:26px;font-weight:800}
 .authc p.sub{text-align:center;color:var(--muted);margin:0 0 22px}
 .err{background:rgba(239,68,68,.14);color:#ff8a8a;border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:12px;line-height:1.4}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#f3f4f6;color:#111;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:200;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#f3f4f6;color:#111;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:200;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .loading{display:grid;place-items:center;min-height:60dvh;color:var(--muted)}
 </style>
 </head>
@@ -170,20 +201,26 @@ textarea{resize:none}
 <div id="app" class="hide">
   <header class="top">
     <button class="childbtn" data-act="childMenu" id="childBtn"></button>
-    <div class="sp"></div>
-    <button class="ibtn" data-act="account" aria-label="Compte">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-    </button>
+    <div class="ptitle hide" id="pTitle">Mon compte</div>
   </header>
-  <div id="view">
-    <div class="quick" id="quick"></div>
-    <div id="daysec">
-      <div class="daybar" id="daybar"></div>
-      <div class="tl" id="tl"></div>
-      <div class="card" id="summary"></div>
-      <div class="list" id="list"></div>
+  <div id="pageHome">
+    <div id="view">
+      <div class="quick" id="quick"></div>
+      <div id="daysec">
+        <div class="daybar" id="daybar"></div>
+        <div class="tl" id="tl"></div>
+        <div class="card" id="summary"></div>
+        <div class="list" id="list"></div>
+      </div>
     </div>
   </div>
+  <div id="pageChrono" class="hide"></div>
+  <div id="pageAccount" class="hide"></div>
+  <nav class="tabs" id="tabs"><div class="tb">
+    <button class="on" data-tab="home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Accueil</button>
+    <button data-tab="chrono"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h8"/><circle cx="18" cy="6" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>Chronologie</button>
+    <button data-tab="account"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Mon compte</button>
+  </div></nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -194,7 +231,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1437';
+const APP_VERSION='26.11.27.1454';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -293,7 +330,7 @@ function nursingSecs(e,now){
 }
 
 /* ───────── État ───────── */
-const S={user:null,children:[],child:null,day:todayStr(),events:[],running:[],recent:[],summaryOpen:true,deferredPrompt:null};
+const S={tab:'home',weekStart:null,weekEvents:[],user:null,children:[],child:null,day:todayStr(),events:[],running:[],recent:[],summaryOpen:true,deferredPrompt:null};
 const sb=(typeof supabase!=='undefined'&&SUPABASE_KEY.indexOf('__')!==0)?supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}}):null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
@@ -398,6 +435,8 @@ async function loadAll(){
   S.events=evs.filter(e=>overlaps(e,r)).sort((a,b)=>Date.parse(b.started_at)-Date.parse(a.started_at));
   render();
   notifSync();
+  if(S.tab==='chrono')loadWeek();
+  if(S.tab==='account')renderAccount();
 }
 
 /* ───────── Rendu ───────── */
@@ -446,39 +485,52 @@ function renderDayBar(){
   <button class="ibtn" data-act="next" aria-label="Jour suivant" ${isToday?'disabled style="opacity:.25"':''}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
   <span class="sp"></span>${isToday?'':'<button class="tdy" data-act="today">Aujourd\'hui</button>'}`;
 }
-function renderTimeline(){
-  const r=parisDateRange(S.day),span=r.end-r.start;
+function stripHTML(day,events,opt){
+  opt=opt||{};const compact=!!opt.compact,inter=opt.interactive!==false;
+  const r=parisDateRange(day),span=r.end-r.start;
   const pct=ms=>Math.min(100,Math.max(0,(ms-r.start)/span*100));
   const bars=[],marks=[];
-  for(const e of S.events){
+  for(const e of events){
     if(e.type==='sommeil'||e.type==='allaitement'){
-      for(const g of splitSleepByDay(e))if(g.day===S.day)bars.push({e,l:pct(g.start),w:Math.max(pct(g.end)-pct(g.start),.8)});
+      for(const g of splitSleepByDay(e))if(g.day===day)bars.push({e,l:pct(g.start),w:Math.max(pct(g.end)-pct(g.start),.8)});
     }else{
       const s=Date.parse(e.started_at);
       if(s>=r.start&&s<r.end)marks.push({e,x:pct(s),icon:e.type==='couche'&&e.diaper_type?DIAPER[e.diaper_type].icon:TYPES[e.type].icon});
     }
   }
   marks.sort((a,b)=>a.x-b.x);
-  const rows=[];
-  for(const m of marks){let i=0;while(rows[i]!==undefined&&m.x-rows[i]<5)i++;rows[i]=m.x;m.row=i}
-  const R=Math.max(1,rows.length),H=R*19+4+16+16;
-  let h=`<div style="height:${H}px;position:relative">`;
-  for(let k=2;k<=22;k+=2){const x=k/24*100;h+=`<div class="g" style="left:${x}%"></div><span class="hl" style="left:${x}%">${k}</span>`}
-  for(const b of bars)h+=`<button class="bar" data-act="edit" data-id="${b.e.id}" style="left:${b.l}%;width:${b.w}%;top:${4+R*19+2}px;background:${TYPES[b.e.type].color}" aria-label="${TYPES[b.e.type].label}"></button>`;
-  for(const m of marks)h+=`<button class="mk" data-act="edit" data-id="${m.e.id}" style="left:${m.x}%;top:${4+m.row*19}px" aria-label="${TYPES[m.e.type].label}">${m.icon}</button>`;
-  if(S.day===todayStr())h+=`<div class="now" style="left:${pct(Date.now())}%"></div>`;
-  $('#tl').innerHTML=h+'</div>';
+  const gap=compact?7:5.5,RH=compact?15:19,rows=[];
+  for(const m of marks){let i=0;while(rows[i]!==undefined&&m.x-rows[i]<gap)i++;rows[i]=m.x;m.row=i}
+  const R=Math.max(1,rows.length),top=4+R*RH,H=top+18+(compact?2:14);
+  let h='';
+  for(let k=0;k<=24;k+=2){
+    const x=k/24*100;
+    if(k>0&&k<24)h+=`<div class="g" style="left:${x}%"></div>`;
+    if(!compact)h+=`<span class="hl" style="left:${x}%">${k}</span>`;
+  }
+  for(const b of bars){
+    const st=`left:${b.l}%;width:${b.w}%;top:${top+2}px;background:${TYPES[b.e.type].color}`;
+    h+=inter?`<button class="bar" data-act="edit" data-id="${b.e.id}" style="${st}" aria-label="${TYPES[b.e.type].label}"></button>`:`<span class="bar" style="${st}"></span>`;
+  }
+  for(const m of marks){
+    const st=`left:${m.x}%;top:${4+m.row*RH}px;font-size:${compact?12:14}px`;
+    h+=inter?`<button class="mk" data-act="edit" data-id="${m.e.id}" style="${st}" aria-label="${TYPES[m.e.type].label}">${m.icon}</button>`:`<span class="mk" style="${st}">${m.icon}</span>`;
+  }
+  if(day===todayStr())h+=`<div class="now" style="left:${pct(Date.now())}%"></div>`;
+  return`<div style="position:relative;height:${H}px"><div class="in">${h}</div></div>`;
 }
-function summaryData(){
+function renderTimeline(){$('#tl').innerHTML=stripHTML(S.day,S.events)}
+function summaryData(evs,day){
+  evs=evs||S.events;day=day||S.day;
   const out={};ORDER.forEach(t=>out[t]={n:0});
-  for(const e of S.events){
+  for(const e of evs){
     const o=out[e.type];o.n++;
     if(e.type==='allaitement'){const n=nursingSecs(e);o.l=(o.l||0)+n.l;o.r=(o.r||0)+n.r;o.t=(o.t||0)+n.t}
     else if(e.type==='biberon')o.ml=(o.ml||0)+(+e.quantity_ml||0);
     else if(e.type==='couche'){
       if(e.diaper_type==='urine'||e.diaper_type==='mixte')o.u=(o.u||0)+1;
       if(e.diaper_type==='selles'||e.diaper_type==='mixte')o.s=(o.s||0)+1;
-    }else if(e.type==='sommeil'){const g=splitSleepByDay(e).find(x=>x.day===S.day);o.ms=(o.ms||0)+(g?g.ms:0)}
+    }else if(e.type==='sommeil'){const g=splitSleepByDay(e).find(x=>x.day===day);o.ms=(o.ms||0)+(g?g.ms:0)}
     else if(e.type==='tirelait'){o.l=(o.l||0)+(+e.left_ml||0);o.r=(o.r||0)+(+e.right_ml||0)}
   }
   return out;
@@ -827,25 +879,82 @@ function showWelcome(){
 /* ───────── Compte / installation ───────── */
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-function openAccount(){
-  const body=`<p class="info">Connecté : <b style="color:var(--text)">${esc(S.user&&S.user.email||'')}</b></p>
-    <button class="btn ghost" data-m="install" style="width:100%;margin-bottom:10px">📲 Installer l'application</button>
-    <button class="btn ghost" data-m="notif" style="width:100%;margin-bottom:10px">${notifLabel()}</button>
-    <div id="iosHelp" class="info hide">Sur iPhone : touche <b>Partager</b> (carré avec une flèche) puis <b>Sur l'écran d'accueil</b>.</div>
-    <button class="btn danger" data-m="logout" style="width:100%">Se déconnecter</button>
-    <p class="hint" style="text-align:center;margin-top:16px">Baby Day Book · version ${esc(APP_VERSION.indexOf('__')===0?'dev':APP_VERSION)}</p>`;
-  const ov=openModal({title:'Compte',body});
-  ov.addEventListener('click',async ev=>{
-    const m=ev.target.closest('[data-m]');if(!m)return;
-    if(m.dataset.m==='logout'){closeModal();await sb.auth.signOut()}
-    if(m.dataset.m==='notif')notifButton(m);
-    if(m.dataset.m==='install'){
-      if(isStandalone()){toast("L'application est déjà installée");return}
-      if(S.deferredPrompt){S.deferredPrompt.prompt();S.deferredPrompt=null;return}
-      if(isIOS())$('#iosHelp',ov).classList.remove('hide');
-      else toast("Utilise le menu du navigateur › Installer l'application");
+function showTab(t){
+  S.tab=t;
+  $('#pageHome').classList.toggle('hide',t!=='home');
+  $('#pageChrono').classList.toggle('hide',t!=='chrono');
+  $('#pageAccount').classList.toggle('hide',t!=='account');
+  $('#childBtn').classList.toggle('hide',t==='account');
+  $('#pTitle').classList.toggle('hide',t!=='account');
+  $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  window.scrollTo(0,0);
+}
+async function setTab(t){
+  showTab(t);
+  if(t==='chrono'){S.weekStart=weekStartOf(todayStr());await loadWeek()}
+  else if(t==='account')renderAccount();
+  else await loadAll();
+}
+function weekStartOf(day){
+  const dow=(new Date(Date.UTC(+day.slice(0,4),+day.slice(5,7)-1,+day.slice(8,10))).getUTCDay()+6)%7;
+  return addDays(day,-dow);
+}
+async function loadWeek(){
+  if(!S.child||!S.weekStart)return;
+  const ws=S.weekStart,r0=parisDateRange(ws).start,r1=parisDateRange(addDays(ws,7)).start,id=S.child.id;
+  const[a,b]=await Promise.all([
+    sb.from('babydaybook_events').select('*').eq('child_id',id).gte('started_at',new Date(r0-36*3600e3).toISOString()).lt('started_at',new Date(r1).toISOString()).order('started_at',{ascending:true}),
+    sb.from('babydaybook_events').select('*').eq('child_id',id).is('ended_at',null).in('type',RUNNING_TYPES)
+  ]);
+  const err=a.error||b.error;if(err){dbErr(err);return}
+  const evs=(a.data||[]).slice();
+  for(const x of b.data||[])if(!evs.some(e=>e.id===x.id)&&Date.parse(x.started_at)<r1)evs.push(x);
+  S.weekEvents=evs;
+  renderWeek();
+}
+function renderWeek(){
+  const ws=S.weekStart,today=todayStr(),cur=weekStartOf(today),days=[0,1,2,3,4,5,6].map(i=>addDays(ws,i));
+  const fmt=d=>new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',timeZone:TZ}).format(new Date(parisLocalToISO(d,'12:00')));
+  const wd=d=>new Intl.DateTimeFormat('fr-FR',{weekday:'short',timeZone:TZ}).format(new Date(parisLocalToISO(d,'12:00')));
+  const chev=(d)=>`<path d="${d}"/>`;
+  let h=`<div class="wknav"><button class="ibtn" data-act="wprev" aria-label="Semaine précédente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${chev('m15 18-6-6 6-6')}</svg></button>
+    <div class="ttl">${ws===cur?'Cette semaine · ':''}${fmt(days[0])} – ${fmt(days[6])}</div>
+    <button class="ibtn" data-act="wnext" aria-label="Semaine suivante" ${ws>=cur?'disabled style="opacity:.25"':''}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${chev('m9 18 6-6-6-6')}</svg></button></div>`;
+  h+='<div class="wkgrid"><div class="wk wax"><div></div><div class="axis"><div class="in">'+[0,4,8,12,16,20,24].map(k=>`<span style="left:${k/24*100}%">${k}</span>`).join('')+'</div></div></div>';
+  for(const d of days){
+    const fut=d>today,r=parisDateRange(d),evs=fut?[]:S.weekEvents.filter(e=>overlaps(e,r));
+    let cap='';
+    if(!fut){
+      const sm=summaryData(evs,d),p=[];
+      if(sm.sommeil.ms)p.push('🌙 '+fmtHM(sm.sommeil.ms));
+      if(sm.allaitement.n)p.push('🤱 '+sm.allaitement.n);
+      if(sm.biberon.n)p.push('🍼 '+sm.biberon.n+(sm.biberon.ml?` · ${sm.biberon.ml} ml`:''));
+      if(sm.couche.n)p.push('🧷 '+sm.couche.n);
+      cap=p.join('  ·  ');
     }
-  });
+    h+=`<button class="wk${fut?' fut':''}" data-act="gotoDay" data-day="${d}" ${fut?'disabled':''}>
+      <div class="wl${d===today?' td':''}">${esc(wd(d).replace('.',''))}<span>${+d.slice(8,10)}</span></div>
+      <div><div class="tl">${stripHTML(d,evs,{compact:true,interactive:false})}</div><div class="wsum">${cap}</div></div></button>`;
+  }
+  $('#pageChrono').innerHTML=h+'</div>';
+}
+function renderAccount(){
+  const kids=S.children.map(c=>`<div class="chrow${S.child&&c.id===S.child.id?' sel':''}" data-act="pickChild" data-id="${c.id}" role="button">${avatarHTML(c)}<span>${esc(c.name)}</span><span class="ed" data-act="editChild" data-id="${c.id}">Modifier</span></div>`).join('');
+  $('#pageAccount').innerHTML=`
+    <div class="card sec"><div class="sh2">Compte</div><div class="kv"><span>Email</span><b>${esc(S.user&&S.user.email||'')}</b></div></div>
+    <div class="card sec"><div class="sh2">Mes enfants</div>${kids}<button class="btn ghost" data-act="addChild">+ Ajouter un enfant</button></div>
+    <div class="card sec"><div class="sh2">Mot de passe</div><input id="pw1" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe"><button class="btn ghost" data-act="changePwd">Modifier le mot de passe</button></div>
+    <div class="card sec"><div class="sh2">Application</div>
+      <button class="btn ghost" data-act="install" style="margin-top:0">📲 Installer l'application</button>
+      <button class="btn ghost" data-act="notif">${notifLabel()}</button></div>
+    <div class="card sec"><button class="btn danger" data-act="logout" style="margin-top:0">Se déconnecter</button></div>
+    <p class="hint" style="text-align:center;margin:16px 12px 0">Baby Day Book · version ${esc(APP_VERSION.indexOf('__')===0?'dev':APP_VERSION)}</p>`;
+}
+function installApp(){
+  if(isStandalone()){toast("L'application est déjà installée");return}
+  if(S.deferredPrompt){S.deferredPrompt.prompt();S.deferredPrompt=null;return}
+  if(isIOS())openModal({title:"Installer l'application",body:'<p class="info">Sur iPhone : touche <b>Partager</b> (le carré avec une flèche) puis <b>Sur l\'écran d\'accueil</b>.</p>'});
+  else toast("Utilise le menu du navigateur › Installer l'application");
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();S.deferredPrompt=e});
 
@@ -897,7 +1006,29 @@ $('#view').addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&
 document.addEventListener('click',ev=>{
   const el=ev.target.closest('header [data-act]');if(!el)return;
   if(el.dataset.act==='childMenu')openChildMenu();
-  if(el.dataset.act==='account')openAccount();
+});
+$('#tabs').addEventListener('click',ev=>{const b=ev.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)});
+$('#pageChrono').addEventListener('click',async ev=>{
+  const el=ev.target.closest('[data-act]');if(!el)return;
+  const a=el.dataset.act;
+  if(a==='wprev'){S.weekStart=addDays(S.weekStart,-7);await loadWeek()}
+  else if(a==='wnext'&&S.weekStart<weekStartOf(todayStr())){S.weekStart=addDays(S.weekStart,7);await loadWeek()}
+  else if(a==='gotoDay'){S.day=el.dataset.day;await setTab('home')}
+});
+$('#pageAccount').addEventListener('click',async ev=>{
+  const el=ev.target.closest('[data-act]');if(!el)return;
+  const a=el.dataset.act;
+  if(a==='editChild'){ev.stopPropagation();openChildModal(S.children.find(c=>c.id===el.dataset.id))}
+  else if(a==='pickChild'){selectChild(el.dataset.id);await loadAll()}
+  else if(a==='addChild')openChildModal(null);
+  else if(a==='changePwd'){
+    const v=$('#pw1').value;if(v.length<6){toast('6 caractères minimum');return}
+    const{error}=await sb.auth.updateUser({password:v});
+    if(error)toast(authErr(error.message));else{toast('Mot de passe modifié ✅');$('#pw1').value=''}
+  }
+  else if(a==='install')installApp();
+  else if(a==='notif')notifButton(el);
+  else if(a==='logout')await sb.auth.signOut();
 });
 // Balayage horizontal pour changer de jour
 (function(){
@@ -913,7 +1044,7 @@ document.addEventListener('click',ev=>{
 })();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.child&&!modalEl)loadAll()});
 setInterval(tick,1000);
-setInterval(()=>{if(S.child&&!document.hidden){renderQuick();renderTimeline()}},30000);
+setInterval(()=>{if(S.child&&!document.hidden){renderQuick();renderTimeline();if(S.tab==='chrono')renderWeek()}},30000);
 
 /* ───────── Authentification ───────── */
 let signup=false;
@@ -953,7 +1084,7 @@ $('#authForm').addEventListener('submit',async ev=>{
 });
 
 function showAuth(){
-  closeModal();S.child=null;S.children=[];
+  closeModal();S.child=null;S.children=[];showTab('home');
   $('#boot').classList.add('hide');$('#app').classList.add('hide');$('#auth').classList.remove('hide');
   if(!sb)authError('Configuration Supabase manquante (clé publique non renseignée).');
 }
@@ -964,6 +1095,7 @@ async function bootApp(){
   if(!S.children.length){showWelcome();return}
   selectChild(store.get('bdb_child'));
   $('#app').classList.remove('hide');
+  showTab('home');
   S.day=todayStr();
   await loadAll();
   const qs=new URLSearchParams(location.search);
