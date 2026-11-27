@@ -231,7 +231,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1454';
+const APP_VERSION='26.11.27.1549';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -360,7 +360,7 @@ async function swPost(msg){
   }catch(e){}
 }
 const notifOK=()=>'Notification' in window&&Notification.permission==='granted';
-function notifSync(){if(notifOK()&&S.child)swPost({type:'sync',events:S.running,child:S.child.name})}
+function notifSync(){if(notifOK()&&S.child)swPost({type:'sync',events:S.running,child:S.child.name,photo:S.child.photo_url||''})}
 function askNotif(){
   try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(notifSync)}catch(e){}
 }
@@ -1044,6 +1044,7 @@ $('#pageAccount').addEventListener('click',async ev=>{
 })();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.child&&!modalEl)loadAll()});
 setInterval(tick,1000);
+setInterval(()=>{if(!document.hidden&&S.child&&S.running.length)notifSync()},30000);
 setInterval(()=>{if(S.child&&!document.hidden){renderQuick();renderTimeline();if(S.tab==='chrono')renderWeek()}},30000);
 
 /* ───────── Authentification ───────── */

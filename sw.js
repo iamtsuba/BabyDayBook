@@ -38,43 +38,43 @@ const granted = () => typeof Notification !== 'undefined' && Notification.permis
 function actionsFor(e) {
   const max = (typeof Notification !== 'undefined' && Notification.maxActions) || 2;
   if (e.type === 'sommeil') return [{ action: 'finish', title: '☀️ Réveil' }];
-  const list = [{ action: 'finish', title: '⏹ Terminer' }];
+  const list = [{ action: 'finish', title: '■ Terminer' }];
   if (e.active_side) {
-    list.push({ action: 'switch', title: e.active_side === 'left' ? '➡ Passer à droite' : '⬅ Passer à gauche' });
+    list.push({ action: 'switch', title: e.active_side === 'left' ? '▶ D' : '▶ G' });
     list.push({ action: 'pause', title: '⏸ Pause' });
   } else {
-    list.push({ action: 'left', title: '▶ Gauche' }, { action: 'right', title: '▶ Droite' });
+    list.push({ action: 'left', title: '▶ G' }, { action: 'right', title: '▶ D' });
   }
   return list.slice(0, max);
 }
 
-async function show(e, child) {
+async function show(e, child, photo) {
   if (!granted()) return;
   const tag = TAG + e.id;
-  const sig = [e.id, e.active_side || '', e.left_sec, e.right_sec, e.ended_at || ''].join('|');
+  const sig = [e.id, e.active_side || '', e.left_sec, e.right_sec, e.ended_at || '', Math.floor(Date.now() / 60000)].join('|');
   const ex = await self.registration.getNotifications({ tag });
   if (ex.some((n) => n.data && n.data.sig === sig)) return;
   const started = Date.parse(e.started_at);
   let title, body;
   if (e.type === 'allaitement') {
     const c = secs(e);
-    const side = e.active_side === 'left' ? 'sein gauche' : e.active_side === 'right' ? 'sein droit' : 'en pause';
-    title = e.active_side ? '🤱 Allaitement en cours' : '🤱 Allaitement en pause';
-    body = `${child ? child + ' · ' : ''}${side} · G ${mins(c.l)} · D ${mins(c.r)} (à ${hm(Date.now())})`;
+    const side = e.active_side === 'left' ? 'G' : e.active_side === 'right' ? 'D' : 'pause';
+    title = `🤱 Allaitement (${side})`;
+    body = `${child ? child + ' · ' : ''}G ${mins(c.l)} · D ${mins(c.r)} · à ${hm(Date.now())}`;
   } else {
     title = `🌙 ${child || 'Bébé'} dort`;
     body = `Endormi à ${hm(started)}`;
   }
   await self.registration.showNotification(title, {
-    body, tag, icon: 'icon-192.png', badge: 'badge.png', timestamp: started,
+    body, tag, icon: photo || 'icon-192.png', badge: 'badge.png', timestamp: started,
     silent: true, renotify: false, requireInteraction: true,
-    actions: actionsFor(e), data: { id: e.id, type: e.type, child: child || '', sig }
+    actions: actionsFor(e), data: { id: e.id, type: e.type, child: child || '', photo: photo || '', sig }
   });
 }
 
-async function syncAll(events, child) {
+async function syncAll(events, child, photo) {
   const keep = new Set();
-  for (const ev of events) { keep.add(TAG + ev.id); await show(ev, child); }
+  for (const ev of events) { keep.add(TAG + ev.id); await show(ev, child, photo); }
   for (const n of await self.registration.getNotifications()) {
     if (n.tag && n.tag.startsWith(TAG) && !keep.has(n.tag)) n.close();
   }
@@ -85,7 +85,7 @@ async function closeAll() {
 
 self.addEventListener('message', (e) => {
   const m = e.data || {};
-  if (m.type === 'sync') e.waitUntil(syncAll(m.events || [], m.child));
+  if (m.type === 'sync') e.waitUntil(syncAll(m.events || [], m.child, m.photo));
   else if (m.type === 'clear') e.waitUntil(closeAll());
 });
 
@@ -113,7 +113,7 @@ async function apply(d, act) {
   const u = await fetch(url, { method: 'PATCH', headers: { ...H, Prefer: 'return=representation' }, body: JSON.stringify(patch) });
   if (!u.ok) return false;
   const ne = (await u.json())[0];
-  if (ne && !ne.ended_at) await show(ne, d.child);
+  if (ne && !ne.ended_at) await show(ne, d.child, d.photo);
   return true;
 }
 
