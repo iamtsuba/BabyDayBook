@@ -231,7 +231,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1549';
+const APP_VERSION='26.11.27.2341';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -244,12 +244,12 @@ const TYPES={
   allaitement:{label:'Allaitement',icon:'🤱',color:'#ee4b82'},
   tirelait:{label:'Tire-lait',icon:'🥛',color:'#a66bd6'},
   biberon:{label:'Biberon',icon:'🍼',color:'#2fa2ee'},
-  repas:{label:'Repas',icon:'🥣',color:'#f59e0b'},
-  couche:{label:'Couche',icon:'🧷',color:'#34c98a'},
+  bain:{label:'Bain',icon:'🛁',color:'#3b82f6'},
+  couche:{label:'Couche',icon:'🩲',color:'#34c98a'},
   sommeil:{label:'Sommeil',icon:'🌙',color:'#8bc34a'},
   medicament:{label:'Médicament',icon:'💊',color:'#22c3d6'}
 };
-const ORDER=['allaitement','biberon','couche','sommeil','repas','tirelait','medicament'];
+const ORDER=['allaitement','biberon','couche','sommeil','bain','tirelait','medicament'];
 const DIAPER={urine:{label:'Pipi',icon:'💧'},selles:{label:'Selles',icon:'💩'},mixte:{label:'Mixte',icon:'🚽'}};
 const RUNNING_TYPES=['allaitement','sommeil'];
 
@@ -579,7 +579,7 @@ function rowHTML(e){
       break;}
     case'biberon':sub=`${e.quantity_ml?`${+e.quantity_ml}ml`:'—'}${e.label?` · ${esc(e.label)}`:''}`;break;
     case'couche':sub=e.diaper_type?DIAPER[e.diaper_type].label:'';break;
-    case'repas':sub=`${esc(e.label||'Repas')}${e.quantity_g?` · ${+e.quantity_g} g`:''}`;break;
+    case'bain':sub=esc(e.label||'');break;
     case'tirelait':{const l=+e.left_ml||0,r=+e.right_ml||0;sub=`G:${l}ml D:${r}ml · total ${l+r}ml`;break;}
     case'medicament':sub=esc(e.label||'Médicament');break;
   }
@@ -658,9 +658,8 @@ function openEvent(type,e){
     body+=`<div class="fr"><label>Quantité (ml)</label><div class="step"><button type="button" data-d="-10">−</button><input id="f-ml" type="number" inputmode="decimal" min="0" step="5" value="${def==null?'':+def}"><button type="button" data-d="10">+</button></div>
       <div class="chips">${[60,90,120,150,180,210].map(v=>`<button type="button" data-ml="${v}">${v}</button>`).join('')}</div></div>
       <div class="fr"><label>Contenu</label><select id="f-label">${['Lait maternel','Lait infantile','Autre'].map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('')}</select></div>`+notesField;
-  }else if(type==='repas'){
-    body+=`<div class="fr"><label>Aliment</label><input id="f-label" type="text" placeholder="Purée, compote, céréales…" value="${esc(e&&e.label||'')}"></div>
-      <div class="fr"><label>Quantité (g) — facultatif</label><input id="f-g" type="number" inputmode="decimal" min="0" value="${e&&e.quantity_g!=null?+e.quantity_g:''}"></div>`+notesField;
+  }else if(type==='bain'){
+    body+=`<div class="fr"><label>Détail — facultatif</label><input id="f-label" type="text" placeholder="Bain, lavage des cheveux…" value="${esc(e&&e.label||'')}"></div>`+notesField;
   }else if(type==='tirelait'){
     body+=`<div class="col2"><div class="fr"><label>Gauche (ml)</label><input id="f-l" type="number" inputmode="decimal" min="0" value="${e&&e.left_ml!=null?+e.left_ml:''}"></div>
       <div class="fr"><label>Droite (ml)</label><input id="f-r" type="number" inputmode="decimal" min="0" value="${e&&e.right_ml!=null?+e.right_ml:''}"></div></div>
@@ -698,7 +697,7 @@ function openEvent(type,e){
     const p={type,started_at:iso,ended_at:iso,notes:(q('#f-notes')&&q('#f-notes').value.trim())||null};
     if(type==='couche')p.diaper_type=(q('#seg .on')||{dataset:{}}).dataset.v||'urine';
     if(type==='biberon'){const ml=q('#f-ml').value;if(!ml||+ml<=0){toast('Indique une quantité');return}p.quantity_ml=+ml;p.label=q('#f-label').value}
-    if(type==='repas'){p.label=q('#f-label').value.trim()||null;p.quantity_g=q('#f-g').value?+q('#f-g').value:null}
+    if(type==='bain'){p.label=q('#f-label').value.trim()||null}
     if(type==='tirelait'){const l=+q('#f-l').value||0,r=+q('#f-r').value||0;if(l+r<=0){toast('Indique une quantité');return}p.left_ml=l;p.right_ml=r}
     if(type==='medicament'){p.label=q('#f-label').value.trim()||null;if(!p.label){toast('Indique le médicament');return}}
     m.disabled=true;const ok=await saveEvent(e,p);if(!ok)m.disabled=false;
@@ -929,7 +928,7 @@ function renderWeek(){
       if(sm.sommeil.ms)p.push('🌙 '+fmtHM(sm.sommeil.ms));
       if(sm.allaitement.n)p.push('🤱 '+sm.allaitement.n);
       if(sm.biberon.n)p.push('🍼 '+sm.biberon.n+(sm.biberon.ml?` · ${sm.biberon.ml} ml`:''));
-      if(sm.couche.n)p.push('🧷 '+sm.couche.n);
+      if(sm.couche.n)p.push('🩲 '+sm.couche.n);
       cap=p.join('  ·  ');
     }
     h+=`<button class="wk${fut?' fut':''}" data-act="gotoDay" data-day="${d}" ${fut?'disabled':''}>

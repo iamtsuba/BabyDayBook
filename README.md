@@ -1,6 +1,6 @@
 # Baby Day Book
 
-Journal de la journée de bébé (allaitement, tire-lait, biberon, repas, couches, sommeil, médicaments), en **PWA** : un seul fichier `index.html`, installable sur le téléphone.
+Journal de la journée de bébé (allaitement, tire-lait, biberon, bain, couches, sommeil, médicaments), en **PWA** : un seul fichier `index.html`, installable sur le téléphone.
 
 - Hébergement : GitHub Pages
 - Données : Supabase (tables `babydaybook_children` et `babydaybook_events`, RLS par utilisateur)

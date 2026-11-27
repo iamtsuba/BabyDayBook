@@ -20,7 +20,7 @@ create table if not exists public.babydaybook_events (
   id            uuid primary key default gen_random_uuid(),
   child_id      uuid not null references public.babydaybook_children(id) on delete cascade,
   user_id       uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  type          text not null check (type in ('allaitement','tirelait','biberon','repas','couche','sommeil','medicament')),
+  type          text not null check (type in ('allaitement','tirelait','biberon','bain','couche','sommeil','medicament')),
   started_at    timestamptz not null,
   ended_at      timestamptz,
   left_sec      integer not null default 0,   -- allaitement : secondes sein gauche
@@ -30,9 +30,9 @@ create table if not exists public.babydaybook_events (
   quantity_ml   numeric,                      -- biberon
   left_ml       numeric,                      -- tire-lait
   right_ml      numeric,                      -- tire-lait
-  quantity_g    numeric,                      -- repas
+  quantity_g    numeric,                      -- (inutilisé)
   diaper_type   text check (diaper_type in ('urine','selles','mixte')),
-  label         text,                         -- repas : aliment · médicament : nom · biberon : contenu
+  label         text,                         -- bain : détail · médicament : nom · biberon : contenu
   notes         text,
   created_at    timestamptz not null default now()
 );
