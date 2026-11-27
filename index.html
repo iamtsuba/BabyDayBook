@@ -194,7 +194,7 @@ textarea{resize:none}
 /* ───────── Configuration ───────── */
 const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
 const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
-const APP_VERSION='26.11.27.1428';
+const APP_VERSION='26.11.27.1437';
 const TZ='Europe/Paris';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -687,7 +687,7 @@ function openSleep(e){
 function openNursing(e){
   const T=TYPES.allaitement;
   let dr=e?{...e}:{id:null,started_at:nowISO(),ended_at:null,left_sec:0,right_sec:0,active_side:null,active_since:null,notes:''};
-  let used=false,lastAuto=null;
+  let used=false,lastAuto=null,manualMin=false;
   const body=`<div class="fr"><label>Début</label>${dtFields('f',dr.started_at)}</div>
     <div class="timers" style="--c:${T.color}">${['left','right'].map(s=>`<div class="tm" id="tm-${s}">
       <div class="tl2">${s==='left'?'Gauche':'Droite'}</div><div class="dg" id="dg-${s}">00:00</div>
@@ -732,15 +732,21 @@ function openNursing(e){
   ov.addEventListener('input',ev=>{
     const m=ev.target.id&&ev.target.id.match(/^mn-(left|right)$/);
     if(!m||dr.active_side===m[1])return;
-    dr[m[1]+'_sec']=Math.max(0,Math.round((+ev.target.value||0)*60));paint();
+    manualMin=true;dr[m[1]+'_sec']=Math.max(0,Math.round((+ev.target.value||0)*60));paint();
   });
   async function save(btn){
     const iso=readDt('f');if(!iso){toast('Date ou heure invalide');return}
     const c=nursingSecs(dr);
     if(c.t<=0&&!dr.id){toast('Ajoute un temps ou lance un chrono');return}
     const wasRunning=dr.id&&dr.ended_at==null;
-    const patch={started_at:iso,left_sec:c.l,right_sec:c.r,active_side:null,active_since:null,notes:q('#f-notes').value.trim()||null,
-      ended_at:(used||wasRunning)?new Date().toISOString():new Date(Date.parse(iso)+c.t*1000).toISOString()};
+    const startChanged=Math.floor(Date.parse(iso)/60000)!==Math.floor(Date.parse(dr.started_at)/60000);
+    // Fin = début + temps des deux seins pour une saisie manuelle ; fin = maintenant pour un chrono en direct ;
+    // fin inchangée si on ne touche ni au début ni aux durées d'une activité déjà terminée.
+    let ended;
+    if(dr.id&&dr.ended_at&&!used&&!startChanged&&!manualMin)ended=dr.ended_at;
+    else if(manualMin||(!used&&!wasRunning))ended=new Date(Date.parse(iso)+c.t*1000).toISOString();
+    else ended=new Date().toISOString();
+    const patch={started_at:iso,left_sec:c.l,right_sec:c.r,active_side:null,active_since:null,notes:q('#f-notes').value.trim()||null,ended_at:ended};
     btn.disabled=true;
     const ok=dr.id?await updateEvent(dr.id,patch):await insertEvent({type:'allaitement',...patch});
     if(!ok){btn.disabled=false;return}
