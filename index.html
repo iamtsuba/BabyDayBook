@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151619">
+<meta name="color-scheme" content="dark">
+<title>Baby Day Book</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Baby Day Book">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#151619; --bg2:#1b1d21; --card:#23252a; --card2:#2c2f36; --text:#eceef1; --muted:#9a9fa8;
+  --line:rgba(255,255,255,.08); --danger:#ef4444; --accent:#3dd6c6; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;-webkit-text-size-adjust:100%}
+body{min-height:100dvh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,select,textarea{font:inherit;font-size:16px;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;outline:none;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:none}
+.hide{display:none!important}
+#app{max-width:560px;margin:0 auto;min-height:100dvh;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+
+/* En-tête */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:var(--bg)}
+.childbtn{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;min-width:0}
+.childbtn .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
+.avatar{position:relative;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#3dd6c6,#3b82f6);display:grid;place-items:center;font-weight:800;overflow:hidden;color:#06222a;flex:0 0 auto}
+.avatar i{font-style:normal}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sp{flex:1}
+.ibtn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.ibtn:active{background:var(--card)}
+
+/* Actions rapides */
+.quick{display:flex;gap:4px;overflow-x:auto;padding:12px 8px 14px;background:var(--bg2);scrollbar-width:none;border-radius:18px 18px 0 0}
+.quick::-webkit-scrollbar{display:none}
+.qa{flex:0 0 auto;width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.qa .circ{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:27px;background:var(--c);box-shadow:0 2px 10px rgba(0,0,0,.35);transition:transform .12s}
+.qa:active .circ{transform:scale(.92)}
+.qa .stt{font-size:11.5px;font-weight:700;line-height:1.2;min-height:14px;color:var(--text)}
+.qa .nm2{font-size:10.5px;color:var(--muted);line-height:1.1}
+.qa.run .circ{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px var(--c)}
+
+/* Jour */
+.daybar{display:flex;align-items:center;gap:6px;padding:14px 14px 8px}
+.daylabel{position:relative;font-weight:600;border-bottom:1px dashed var(--muted);padding-bottom:2px}
+.daylabel input{position:absolute;inset:0;width:100%;height:100%;opacity:0;padding:0;border:0}
+.daybar .ibtn{width:32px;height:32px}
+.tdy{font-size:12px;font-weight:700;color:var(--accent);padding:5px 10px;border-radius:999px;background:rgba(61,214,198,.12)}
+
+/* Frise */
+.tl{position:relative;background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.tl .g{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.tl .hl{position:absolute;bottom:2px;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.tl .mk{position:absolute;transform:translateX(-50%);font-size:14px;line-height:1;padding:0}
+.tl .bar{position:absolute;height:12px;border-radius:3px;min-width:3px;padding:0}
+.tl .now{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);opacity:.7}
+
+/* Cartes */
+.card{background:var(--card);border-radius:14px;margin:12px 12px 0;overflow:hidden}
+.sumhead{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 14px;font-weight:600;color:var(--muted)}
+.sumhead svg{transition:transform .2s}
+.sumhead.open svg{transform:rotate(180deg)}
+.srow{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);font-size:14px}
+.srow .si{width:22px;text-align:center;font-size:16px}
+.srow .sn{font-weight:800;min-width:22px}
+.srow .sd{color:var(--muted);font-size:13px}
+.empty{padding:26px 18px;text-align:center;color:var(--muted);line-height:1.5}
+
+/* Liste d'activités */
+.list{margin:12px 12px 0;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--card);border-radius:14px;cursor:pointer;text-align:left;width:100%}
+.row:active{background:var(--card2)}
+.ri{flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
+.rm{flex:1;min-width:0}
+.rt{font-weight:700;font-size:15px}
+.rs2{color:var(--muted);font-size:13px;margin-top:2px;line-height:1.4}
+.nt{color:var(--muted);font-size:12.5px;margin-top:3px;font-style:italic}
+.tr{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;opacity:.55;font-size:15px}
+.tr:active{background:rgba(239,68,68,.2);opacity:1}
+.ctl{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pill{padding:9px 14px;border-radius:999px;font-weight:700;font-size:13px;border:1.5px solid var(--c);color:var(--c)}
+.pill.on{background:var(--c);color:#fff}
+
+/* Modales */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:93dvh;background:var(--card);border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 6px}
+.stl{font-weight:800;font-size:18px;display:flex;align-items:center;gap:10px}
+.stl .dot{width:30px;height:30px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:16px}
+.x{width:34px;height:34px;border-radius:50%;background:var(--danger);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center;flex:0 0 auto}
+.sb{padding:8px 16px 4px;overflow-y:auto}
+.sf{display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sf .btn{flex:1}
+.btn{padding:13px 16px;border-radius:14px;font-weight:800;font-size:15px;text-align:center}
+.btn.pri{background:var(--accent);color:#06222a}
+.btn.danger{border:1.5px solid var(--danger);color:var(--danger);flex:0 0 auto}
+.btn.ghost{background:var(--card2)}
+.btn:disabled{opacity:.5}
+.fr{margin-bottom:12px}
+.fr>label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.two{display:grid;grid-template-columns:1.35fr 1fr;gap:8px}
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{padding:12px 6px;border-radius:14px;background:var(--card2);border:2px solid transparent;font-weight:700;font-size:13px;line-height:1.5}
+.seg button span{font-size:24px}
+.seg button.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,var(--card2))}
+.step{display:grid;grid-template-columns:48px 1fr 48px;gap:8px}
+.step button{border-radius:12px;background:var(--card2);font-size:22px;font-weight:700}
+.step input{text-align:center;font-size:20px;font-weight:700}
+.chips{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chips button{padding:6px 12px;border-radius:999px;background:var(--card2);font-size:13px;font-weight:600}
+.timers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.tm{background:var(--card2);border-radius:16px;padding:12px;text-align:center}
+.tm .tl2{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.tm .dg{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0 8px}
+.tm .tbtn{width:100%;padding:10px;border-radius:12px;background:var(--c);color:#fff;font-weight:800;font-size:14px}
+.tm.act{box-shadow:inset 0 0 0 2px var(--c)}
+.tm .man{display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center;color:var(--muted);font-size:12px}
+.tm .man input{width:64px;padding:6px 8px;text-align:center;font-size:15px}
+.tot{text-align:center;color:var(--muted);margin:2px 0 12px}
+.tot b{color:var(--text);font-size:18px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.info{color:var(--muted);line-height:1.5;font-size:14px;margin:4px 0 14px}
+.lnk{display:block;width:100%;text-align:center;color:var(--muted);padding:10px;font-size:13px;text-decoration:underline}
+.chrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:14px;background:var(--card2);margin-bottom:8px;text-align:left;font-weight:700}
+.chrow.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.chrow .ed{margin-left:auto;color:var(--muted);font-size:13px;font-weight:600}
+
+/* Connexion */
+.auth{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.authc{width:100%;max-width:380px}
+.logo{width:84px;height:84px;border-radius:22px;display:block;margin:0 auto 14px;box-shadow:0 8px 30px rgba(59,130,246,.35)}
+.authc h1{text-align:center;margin:0 0 4px;font-size:26px;font-weight:800}
+.authc p.sub{text-align:center;color:var(--muted);margin:0 0 22px}
+.err{background:rgba(239,68,68,.14);color:#ff8a8a;border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:12px;line-height:1.4}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#f3f4f6;color:#111;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:200;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.loading{display:grid;place-items:center;min-height:60dvh;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div id="boot" class="loading">Chargement…</div>
+
+<div id="auth" class="auth hide">
+  <form class="authc" id="authForm" autocomplete="on">
+    <img class="logo" src="icon-192.png" alt="">
+    <h1>Baby Day Book</h1>
+    <p class="sub" id="authSub">Connecte-toi pour retrouver la journée de bébé</p>
+    <div id="authErr" class="err hide"></div>
+    <div class="fr"><label for="email">Email</label><input id="email" type="email" autocomplete="email" inputmode="email" required></div>
+    <div class="fr"><label for="pwd">Mot de passe</label><input id="pwd" type="password" autocomplete="current-password" minlength="6" required></div>
+    <button class="btn pri" id="authBtn" type="submit" style="width:100%">Se connecter</button>
+    <button class="lnk" id="authToggle" type="button">Pas encore de compte ? Créer un compte</button>
+  </form>
+</div>
+
+<div id="app" class="hide">
+  <header class="top">
+    <button class="childbtn" data-act="childMenu" id="childBtn"></button>
+    <div class="sp"></div>
+    <button class="ibtn" data-act="account" aria-label="Compte">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+    </button>
+  </header>
+  <div id="view">
+    <div class="quick" id="quick"></div>
+    <div id="daysec">
+      <div class="daybar" id="daybar"></div>
+      <div class="tl" id="tl"></div>
+      <div class="card" id="summary"></div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+'use strict';
+
+/* ───────── Configuration ───────── */
+const SUPABASE_URL='https://uhsodmpqoporeiebhvwt.supabase.co';
+const SUPABASE_KEY='sb_publishable_QWvqHKDxPisbpahTcXuwVw_evcXHVif';
+const APP_VERSION='26.11.27.1210';
+const TZ='Europe/Paris';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+
+/* ───────── Types d'activité ───────── */
+const TYPES={
+  allaitement:{label:'Allaitement',icon:'🤱',color:'#ee4b82'},
+  tirelait:{label:'Tire-lait',icon:'🥛',color:'#a66bd6'},
+  biberon:{label:'Biberon',icon:'🍼',color:'#2fa2ee'},
+  repas:{label:'Repas',icon:'🥣',color:'#f59e0b'},
+  couche:{label:'Couche',icon:'🧷',color:'#34c98a'},
+  sommeil:{label:'Sommeil',icon:'🌙',color:'#8bc34a'},
+  medicament:{label:'Médicament',icon:'💊',color:'#22c3d6'}
+};
+const ORDER=['allaitement','biberon','couche','sommeil','repas','tirelait','medicament'];
+const DIAPER={urine:{label:'Pipi',icon:'💧'},selles:{label:'Selles',icon:'💩'},mixte:{label:'Mixte',icon:'🚽'}};
+const RUNNING_TYPES=['allaitement','sommeil'];
+
+/* ───────── Heure de Paris ───────── */
+const parisStr=d=>d.toLocaleString('sv-SE',{timeZone:TZ}); // YYYY-MM-DD HH:MM:SS
+function parisParts(d){const s=parisStr(d);return{date:s.slice(0,10),time:s.slice(11,16)}}
+function parisOffsetMs(utcMs){
+  const s=parisStr(new Date(utcMs));
+  const y=+s.slice(0,4),mo=+s.slice(5,7),d=+s.slice(8,10),h=+s.slice(11,13),mi=+s.slice(14,16),se=+s.slice(17,19);
+  return Date.UTC(y,mo-1,d,h,mi,se)-Math.floor(utcMs/1000)*1000;
+}
+function parisLocalToISO(date,time){
+  const y=+date.slice(0,4),mo=+date.slice(5,7),d=+date.slice(8,10),h=+time.slice(0,2),mi=+time.slice(3,5);
+  const asUTC=Date.UTC(y,mo-1,d,h,mi,0);
+  let t=asUTC-parisOffsetMs(asUTC);
+  t=asUTC-parisOffsetMs(t);
+  return new Date(t).toISOString();
+}
+function addDays(day,n){const d=new Date(Date.UTC(+day.slice(0,4),+day.slice(5,7)-1,+day.slice(8,10)+n));return d.toISOString().slice(0,10)}
+function parisDateRange(day){return{start:Date.parse(parisLocalToISO(day,'00:00')),end:Date.parse(parisLocalToISO(addDays(day,1),'00:00'))}}
+const todayStr=()=>parisParts(new Date()).date;
+const hm=ms=>parisParts(new Date(ms)).time;
+function nowISO(){const d=new Date();d.setSeconds(0,0);return d.toISOString()}
+
+/* Découpe un sommeil (ou toute durée) par jour de Paris */
+function splitSleepByDay(e){
+  const s=Date.parse(e.started_at),en=e.ended_at?Date.parse(e.ended_at):Date.now(),out=[];
+  if(!(en>s))return out;
+  let day=parisParts(new Date(s)).date;
+  for(let g=0;g<60;g++){
+    const r=parisDateRange(day),a=Math.max(s,r.start),b=Math.min(en,r.end);
+    if(b>a)out.push({day,start:a,end:b,ms:b-a});
+    if(en<=r.end)break;
+    day=addDays(day,1);
+  }
+  return out;
+}
+
+/* ───────── Formats ───────── */
+function fmtMS(sec){sec=Math.max(0,Math.round(sec));const m=Math.floor(sec/60),s=sec%60;if(m>=60)return`${Math.floor(m/60)}h ${m%60}m`;return m?`${m}m ${s}s`:`${s}s`}
+function fmtHM(ms){const m=Math.max(0,Math.floor(ms/60000)),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:`${m}m`}
+function noteFmt(sec){return`${Math.floor(sec/60)}m${sec%60}s`}
+function agoLabel(ms){
+  const m=Math.floor(ms/60000);
+  if(m<1)return"À l'instant";
+  if(m<60)return`Il y a ${m}m`;
+  const h=Math.floor(m/60);
+  if(h<24)return`Il y a ${h}h ${m%60}m`;
+  return`Il y a ${Math.floor(h/24)}j ${h%24}h`;
+}
+function ageText(birth,day){
+  if(!birth)return null;
+  const by=+birth.slice(0,4),bm=+birth.slice(5,7),bd=+birth.slice(8,10),y=+day.slice(0,4),m=+day.slice(5,7),d=+day.slice(8,10);
+  const days=Math.round((Date.UTC(y,m-1,d)-Date.UTC(by,bm-1,bd))/864e5);
+  if(days<0)return'Pas encore né';
+  if(days<31)return`${days}j (Semaine ${Math.floor(days/7)+1})`;
+  let months=(y-by)*12+(m-bm),dd=d-bd;
+  if(dd<0){months--;dd+=new Date(Date.UTC(y,m-1,0)).getUTCDate()}
+  const yrs=Math.floor(months/12),mo=months%12;
+  if(yrs>=1)return`${yrs} an${yrs>1?'s':''}${mo?` ${mo} mois`:''}`;
+  return`${months} mois${dd?` ${dd}j`:''}`;
+}
+function dayTitle(day){
+  const t=todayStr();
+  const lab=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short',timeZone:TZ}).format(new Date(parisLocalToISO(day,'12:00')));
+  if(day===t)return`Aujourd'hui, ${lab}`;
+  if(day===addDays(t,-1))return`Hier, ${lab}`;
+  return lab;
+}
+function nursingSecs(e,now){
+  now=now||Date.now();
+  let l=e.left_sec||0,r=e.right_sec||0;
+  if(e.active_side&&e.active_since){
+    const d=Math.max(0,Math.floor((now-Date.parse(e.active_since))/1000));
+    if(e.active_side==='left')l+=d;else r+=d;
+  }
+  return{l,r,t:l+r};
+}
+
+/* ───────── État ───────── */
+const S={user:null,children:[],child:null,day:todayStr(),events:[],running:[],recent:[],summaryOpen:true,deferredPrompt:null};
+const sb=(typeof supabase!=='undefined'&&SUPABASE_KEY.indexOf('__')!==0)?supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}}):null;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+function dbErr(error){
+  console.error(error);
+  const m=(error&&error.message)||'';
+  if(error&&(error.code==='42P01'||/relation .* does not exist|schema cache/i.test(m)))toast("Tables manquantes : exécute supabase/schema.sql dans Supabase.");
+  else toast('Erreur : '+m);
+}
+
+/* ───────── Accès données ───────── */
+async function insertEvent(row){
+  const{data,error}=await sb.from('babydaybook_events').insert({...row,child_id:S.child.id}).select().single();
+  if(error){dbErr(error);return null}
+  return data;
+}
+async function updateEvent(id,patch){
+  const{data,error}=await sb.from('babydaybook_events').update(patch).eq('id',id).select().single();
+  if(error){dbErr(error);return null}
+  return data;
+}
+async function deleteEvent(id){
+  const{error}=await sb.from('babydaybook_events').delete().eq('id',id);
+  if(error){dbErr(error);return false}
+  return true;
+}
+async function loadChildren(){
+  const{data,error}=await sb.from('babydaybook_children').select('*').order('created_at',{ascending:true});
+  if(error){dbErr(error);return false}
+  S.children=data||[];
+  return true;
+}
+function overlaps(e,r){
+  const s=Date.parse(e.started_at),en=e.ended_at?Date.parse(e.ended_at):Infinity;
+  return s<r.end&&(en>r.start||s>=r.start);
+}
+async function loadAll(){
+  if(!S.child)return;
+  const r=parisDateRange(S.day),id=S.child.id;
+  const from=new Date(r.start-36*3600e3).toISOString(),to=new Date(r.end).toISOString();
+  const[dayRes,runRes,recRes]=await Promise.all([
+    sb.from('babydaybook_events').select('*').eq('child_id',id).gte('started_at',from).lt('started_at',to).order('started_at',{ascending:false}),
+    sb.from('babydaybook_events').select('*').eq('child_id',id).is('ended_at',null).in('type',RUNNING_TYPES),
+    sb.from('babydaybook_events').select('*').eq('child_id',id).order('started_at',{ascending:false}).limit(150)
+  ]);
+  const err=dayRes.error||runRes.error||recRes.error;
+  if(err){dbErr(err);return}
+  S.running=runRes.data||[];
+  S.recent=recRes.data||[];
+  const evs=(dayRes.data||[]).slice();
+  for(const x of S.running)if(!evs.some(e=>e.id===x.id)&&Date.parse(x.started_at)<r.end)evs.push(x);
+  S.events=evs.filter(e=>overlaps(e,r)).sort((a,b)=>Date.parse(b.started_at)-Date.parse(a.started_at));
+  render();
+}
+
+/* ───────── Rendu ───────── */
+function avatarHTML(c){
+  const ini=esc((c&&c.name||'?').trim().charAt(0).toUpperCase());
+  const img=c&&c.photo_url?`<img src="${esc(c.photo_url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:'';
+  return`<span class="avatar"><i>${ini}</i>${img}</span>`;
+}
+function renderHeader(){
+  const c=S.child;
+  $('#childBtn').innerHTML=`${avatarHTML(c)}<span class="nm">${esc(c?c.name:'')}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><path d="m6 9 6 6 6-6"/></svg>`;
+}
+const lastOf=t=>S.recent.find(e=>e.type===t);
+const activityMs=e=>Date.parse(e.ended_at||e.started_at);
+function quickOrder(){
+  const runs=new Set(S.running.map(r=>r.type));
+  return ORDER.slice().sort((a,b)=>{
+    const ra=runs.has(a)?1:0,rb=runs.has(b)?1:0;
+    if(ra!==rb)return rb-ra;
+    const la=lastOf(a),lb=lastOf(b),ta=la?activityMs(la):-1,tb=lb?activityMs(lb):-1;
+    if(ta!==tb)return tb-ta;
+    return ORDER.indexOf(a)-ORDER.indexOf(b);
+  });
+}
+function liveHTML(kind,e){
+  if(kind==='qn'){const n=nursingSecs(e);const side=e.active_side==='left'?' (G)':e.active_side==='right'?' (D)':' (pause)';return fmtMS(n.t)+side}
+  if(kind==='qs')return fmtHM(Date.now()-Date.parse(e.started_at));
+  if(kind==='rn'){const n=nursingSecs(e);return nursingDetail(n)}
+  if(kind==='rs')return`En cours · ${fmtHM(Date.now()-Date.parse(e.started_at))}`;
+  return'';
+}
+function nursingDetail(n){return`⏱ ${fmtMS(n.t)}${n.l?` · Gauche: ${fmtMS(n.l)}`:''}${n.r?` · Droite: ${fmtMS(n.r)}`:''}`}
+function renderQuick(){
+  $('#quick').innerHTML=quickOrder().map(t=>{
+    const T=TYPES[t],run=S.running.find(r=>r.type===t);
+    let st='';
+    if(run)st=`<span data-live="${t==='allaitement'?'qn':'qs'}" data-id="${run.id}">${liveHTML(t==='allaitement'?'qn':'qs',run)}</span>`;
+    else{const l=lastOf(t);st=l?agoLabel(Date.now()-activityMs(l)):''}
+    return`<button class="qa${run?' run':''}" data-act="qa" data-type="${t}" style="--c:${T.color}"><span class="circ">${T.icon}</span><span class="stt">${st||'&nbsp;'}</span><span class="nm2">${T.label}</span></button>`;
+  }).join('');
+}
+function renderDayBar(){
+  const isToday=S.day===todayStr();
+  $('#daybar').innerHTML=`<button class="ibtn" data-act="prev" aria-label="Jour précédent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+  <span class="daylabel">${esc(dayTitle(S.day))}<input type="date" id="dayPick" value="${S.day}" max="${todayStr()}" aria-label="Choisir une date"></span>
+  <button class="ibtn" data-act="next" aria-label="Jour suivant" ${isToday?'disabled style="opacity:.25"':''}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+  <span class="sp"></span>${isToday?'':'<button class="tdy" data-act="today">Aujourd\'hui</button>'}`;
+}
+function renderTimeline(){
+  const r=parisDateRange(S.day),span=r.end-r.start;
+  const pct=ms=>Math.min(100,Math.max(0,(ms-r.start)/span*100));
+  const bars=[],marks=[];
+  for(const e of S.events){
+    if(e.type==='sommeil'||e.type==='allaitement'){
+      for(const g of splitSleepByDay(e))if(g.day===S.day)bars.push({e,l:pct(g.start),w:Math.max(pct(g.end)-pct(g.start),.8)});
+    }else{
+      const s=Date.parse(e.started_at);
+      if(s>=r.start&&s<r.end)marks.push({e,x:pct(s),icon:e.type==='couche'&&e.diaper_type?DIAPER[e.diaper_type].icon:TYPES[e.type].icon});
+    }
+  }
+  marks.sort((a,b)=>a.x-b.x);
+  const rows=[];
+  for(const m of marks){let i=0;while(rows[i]!==undefined&&m.x-rows[i]<5)i++;rows[i]=m.x;m.row=i}
+  const R=Math.max(1,rows.length),H=R*19+4+16+16;
+  let h=`<div style="height:${H}px;position:relative">`;
+  for(let k=2;k<=22;k+=2){const x=k/24*100;h+=`<div class="g" style="left:${x}%"></div><span class="hl" style="left:${x}%">${k}</span>`}
+  for(const b of bars)h+=`<button class="bar" data-act="edit" data-id="${b.e.id}" style="left:${b.l}%;width:${b.w}%;top:${4+R*19+2}px;background:${TYPES[b.e.type].color}" aria-label="${TYPES[b.e.type].label}"></button>`;
+  for(const m of marks)h+=`<button class="mk" data-act="edit" data-id="${m.e.id}" style="left:${m.x}%;top:${4+m.row*19}px" aria-label="${TYPES[m.e.type].label}">${m.icon}</button>`;
+  if(S.day===todayStr())h+=`<div class="now" style="left:${pct(Date.now())}%"></div>`;
+  $('#tl').innerHTML=h+'</div>';
+}
+function summaryData(){
+  const out={};ORDER.forEach(t=>out[t]={n:0});
+  for(const e of S.events){
+    const o=out[e.type];o.n++;
+    if(e.type==='allaitement'){const n=nursingSecs(e);o.l=(o.l||0)+n.l;o.r=(o.r||0)+n.r;o.t=(o.t||0)+n.t}
+    else if(e.type==='biberon')o.ml=(o.ml||0)+(+e.quantity_ml||0);
+    else if(e.type==='couche'){
+      if(e.diaper_type==='urine'||e.diaper_type==='mixte')o.u=(o.u||0)+1;
+      if(e.diaper_type==='selles'||e.diaper_type==='mixte')o.s=(o.s||0)+1;
+    }else if(e.type==='sommeil'){const g=splitSleepByDay(e).find(x=>x.day===S.day);o.ms=(o.ms||0)+(g?g.ms:0)}
+    else if(e.type==='tirelait'){o.l=(o.l||0)+(+e.left_ml||0);o.r=(o.r||0)+(+e.right_ml||0)}
+  }
+  return out;
+}
+function renderSummary(){
+  const age=S.child?ageText(S.child.birthdate,S.day):null;
+  const head=`<button class="sumhead${S.summaryOpen?' open':''}" data-act="toggleSummary"><span>${age?`Âge : ${esc(age)}`:'Résumé du jour'}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>`;
+  let rows='';
+  if(S.summaryOpen){
+    const d=summaryData();
+    for(const t of ORDER){
+      const o=d[t];if(!o.n)continue;
+      let det='';
+      if(t==='allaitement')det=`⏱ ${fmtMS(o.t)}${o.l?` · Gauche: ${fmtMS(o.l)}`:''}${o.r?` · Droite: ${fmtMS(o.r)}`:''}`;
+      else if(t==='biberon')det=o.ml?`${o.ml} ml`:'';
+      else if(t==='couche')det=`💧 ${o.u||0} · 💩 ${o.s||0}`;
+      else if(t==='sommeil')det=`⏱ ${fmtHM(o.ms)}`;
+      else if(t==='tirelait')det=`G: ${o.l} ml · D: ${o.r} ml`;
+      rows+=`<div class="srow" style="--c:${TYPES[t].color}"><span class="si">${TYPES[t].icon}</span><span class="sn">${o.n}</span><span class="sd">${det}</span></div>`;
+    }
+    if(!rows)rows='<div class="srow"><span class="sd">Rien d\'enregistré ce jour.</span></div>';
+  }
+  $('#summary').innerHTML=head+rows;
+}
+function lab(ms){const p=parisParts(new Date(ms));return p.date===S.day?p.time:`${p.date.slice(8,10)}/${p.date.slice(5,7)} ${p.time}`}
+function rowHTML(e){
+  const T=TYPES[e.type],s=Date.parse(e.started_at),running=e.ended_at==null;
+  const ic=e.type==='couche'&&e.diaper_type?DIAPER[e.diaper_type].icon:T.icon;
+  let title=lab(s),sub='',extra='';
+  const range=()=>`${lab(s)} - ${running?'En cours':lab(Date.parse(e.ended_at))}`;
+  switch(e.type){
+    case'allaitement':{
+      title=range();const n=nursingSecs(e);
+      sub=running?`<span data-live="rn" data-id="${e.id}">${nursingDetail(n)}</span>`:nursingDetail(n);
+      if(running)extra=`<div class="ctl" style="--c:${T.color}">
+        <span class="pill${e.active_side==='left'?' on':''}" data-act="side" data-id="${e.id}" data-side="left" role="button">${e.active_side==='left'?'⏹ (G) Arrêter':'▶ (G) Reprendre'}</span>
+        <span class="pill${e.active_side==='right'?' on':''}" data-act="side" data-id="${e.id}" data-side="right" role="button">${e.active_side==='right'?'⏹ (D) Arrêter':'▶ (D) Reprendre'}</span>
+        <span class="pill" data-act="finish" data-id="${e.id}" role="button">✔ Terminer</span></div>`;
+      break;}
+    case'sommeil':{
+      title=range();
+      const total=(running?Date.now():Date.parse(e.ended_at))-s,g=splitSleepByDay(e).find(x=>x.day===S.day),today=g?g.ms:0;
+      if(running)sub=`<span data-live="rs" data-id="${e.id}">${liveHTML('rs',e)}</span>`;
+      else sub=Math.abs(total-today)>60000?`${fmtHM(today)} ce jour · ${fmtHM(total)} au total`:`⏱ ${fmtHM(total)}`;
+      if(running)extra=`<div class="ctl" style="--c:${T.color}"><span class="pill" data-act="finish" data-id="${e.id}" role="button">☀️ Réveil</span></div>`;
+      break;}
+    case'biberon':sub=`${e.quantity_ml?`${+e.quantity_ml}ml`:'—'}${e.label?` · ${esc(e.label)}`:''}`;break;
+    case'couche':sub=e.diaper_type?DIAPER[e.diaper_type].label:'';break;
+    case'repas':sub=`${esc(e.label||'Repas')}${e.quantity_g?` · ${+e.quantity_g} g`:''}`;break;
+    case'tirelait':{const l=+e.left_ml||0,r=+e.right_ml||0;sub=`G:${l}ml D:${r}ml · total ${l+r}ml`;break;}
+    case'medicament':sub=esc(e.label||'Médicament');break;
+  }
+  const showNote=e.notes&&!((e.type==='allaitement'||e.type==='tirelait')&&/^[GD]:/.test(e.notes));
+  return`<div class="row" data-act="edit" data-id="${e.id}" style="--c:${T.color}" role="button" tabindex="0">
+    <span class="ri">${ic}</span>
+    <div class="rm"><div class="rt">${title}</div><div class="rs2">${sub}</div>${showNote?`<div class="nt">${esc(e.notes)}</div>`:''}${extra}</div>
+    <button class="tr" data-act="del" data-id="${e.id}" aria-label="Supprimer">🗑</button></div>`;
+}
+function renderList(){
+  $('#list').innerHTML=S.events.length?S.events.map(rowHTML).join(''):`<div class="card empty" style="margin:0">Aucune activité ce jour.<br>Touche un bouton rond ci-dessus pour commencer.</div>`;
+}
+function render(){
+  if(!S.child)return;
+  renderHeader();renderQuick();renderDayBar();renderTimeline();renderSummary();renderList();
+}
+function tick(){
+  $$('[data-live]').forEach(el=>{
+    const e=S.running.find(x=>x.id===el.dataset.id)||S.events.find(x=>x.id===el.dataset.id);
+    if(e)el.innerHTML=liveHTML(el.dataset.live,e);
+  });
+}
+
+/* ───────── Modales ───────── */
+let modalEl=null,modalCleanup=null;
+function closeModal(){
+  if(modalCleanup){try{modalCleanup()}catch(e){}modalCleanup=null}
+  if(modalEl){modalEl.remove();modalEl=null}
+  document.body.style.overflow='';
+}
+function openModal({title,icon,color,body,footer,closable=true,cleanup}){
+  closeModal();
+  const ov=document.createElement('div');ov.className='ov';
+  ov.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" style="--c:${color||'var(--accent)'}">
+    <div class="sh"><div class="stl">${icon?`<span class="dot">${icon}</span>`:''}${title}</div>${closable?'<button class="x" data-m="close" aria-label="Fermer">×</button>':''}</div>
+    <div class="sb">${body}</div>${footer?`<div class="sf">${footer}</div>`:''}</div>`;
+  document.body.appendChild(ov);document.body.style.overflow='hidden';
+  modalEl=ov;modalCleanup=cleanup||null;
+  ov.addEventListener('click',ev=>{if(ev.target.closest('[data-m="close"]'))closeModal()});
+  return ov;
+}
+function dtFields(id,iso){
+  const p=iso?parisParts(new Date(iso)):{date:'',time:''};
+  return`<div class="two"><input type="date" id="${id}-d" value="${p.date}"><input type="time" id="${id}-t" value="${p.time}"></div>`;
+}
+function readDt(id){
+  const d=$('#'+id+'-d').value,t=$('#'+id+'-t').value;
+  return d&&t?parisLocalToISO(d,t):null;
+}
+const footerEdit=(e,primary)=>`${e?'<button class="btn danger" data-m="del">🗑 Supprimer</button>':''}<button class="btn pri" data-m="save">${primary||'Enregistrer'}</button>`;
+
+async function confirmDelete(e){
+  if(!confirm('Supprimer cette activité ?'))return false;
+  if(await deleteEvent(e.id)){closeModal();await loadAll();return true}
+  return false;
+}
+async function saveEvent(e,payload){
+  let ok;
+  if(e)ok=await updateEvent(e.id,payload);else ok=await insertEvent(payload);
+  if(!ok)return false;
+  closeModal();await loadAll();return true;
+}
+
+function openEvent(type,e){
+  if(type==='allaitement')return openNursing(e);
+  if(type==='sommeil')return openSleep(e);
+  const T=TYPES[type],start=e?e.started_at:nowISO();
+  let body=`<div class="fr"><label>Date et heure</label>${dtFields('f',start)}</div>`;
+  const notesField=`<div class="fr"><label>Notes</label><textarea id="f-notes" rows="2">${esc(e&&e.notes||'')}</textarea></div>`;
+  if(type==='couche'){
+    const cur=e&&e.diaper_type||'urine';
+    body+=`<div class="fr"><label>Type</label><div class="seg" id="seg">${Object.keys(DIAPER).map(k=>`<button type="button" data-v="${k}" class="${cur===k?'on':''}"><span>${DIAPER[k].icon}</span><br>${DIAPER[k].label}</button>`).join('')}</div></div>`+notesField;
+  }else if(type==='biberon'){
+    const last=S.recent.find(x=>x.type==='biberon'&&x.quantity_ml),def=e?e.quantity_ml:(last?last.quantity_ml:'');
+    const cur=e&&e.label||'Lait infantile';
+    body+=`<div class="fr"><label>Quantité (ml)</label><div class="step"><button type="button" data-d="-10">−</button><input id="f-ml" type="number" inputmode="decimal" min="0" step="5" value="${def==null?'':+def}"><button type="button" data-d="10">+</button></div>
+      <div class="chips">${[60,90,120,150,180,210].map(v=>`<button type="button" data-ml="${v}">${v}</button>`).join('')}</div></div>
+      <div class="fr"><label>Contenu</label><select id="f-label">${['Lait maternel','Lait infantile','Autre'].map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('')}</select></div>`+notesField;
+  }else if(type==='repas'){
+    body+=`<div class="fr"><label>Aliment</label><input id="f-label" type="text" placeholder="Purée, compote, céréales…" value="${esc(e&&e.label||'')}"></div>
+      <div class="fr"><label>Quantité (g) — facultatif</label><input id="f-g" type="number" inputmode="decimal" min="0" value="${e&&e.quantity_g!=null?+e.quantity_g:''}"></div>`+notesField;
+  }else if(type==='tirelait'){
+    body+=`<div class="col2"><div class="fr"><label>Gauche (ml)</label><input id="f-l" type="number" inputmode="decimal" min="0" value="${e&&e.left_ml!=null?+e.left_ml:''}"></div>
+      <div class="fr"><label>Droite (ml)</label><input id="f-r" type="number" inputmode="decimal" min="0" value="${e&&e.right_ml!=null?+e.right_ml:''}"></div></div>
+      <div class="tot">Total <b id="f-tot">0 ml</b></div>`+notesField;
+  }else if(type==='medicament'){
+    body+=`<div class="fr"><label>Médicament</label><input id="f-label" type="text" placeholder="Doliprane, vitamine D…" value="${esc(e&&e.label||'')}"></div>`+
+      `<div class="fr"><label>Dose / notes</label><textarea id="f-notes" rows="2">${esc(e&&e.notes||'')}</textarea></div>`;
+  }
+  const ov=openModal({title:T.label,icon:T.icon,color:T.color,body,footer:footerEdit(e)});
+  const q=s=>$(s,ov);
+  if(type==='couche')q('#seg').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;$$('#seg button',ov).forEach(x=>x.classList.toggle('on',x===b))});
+  if(type==='biberon'){
+    ov.addEventListener('click',ev=>{
+      const d=ev.target.closest('[data-d]'),c=ev.target.closest('[data-ml]'),i=q('#f-ml');
+      if(d)i.value=Math.max(0,(+i.value||0)+ +d.dataset.d);
+      if(c)i.value=c.dataset.ml;
+    });
+  }
+  if(type==='tirelait'){
+    let lastAuto=e&&e.notes||'';
+    const upd=()=>{
+      const l=+q('#f-l').value||0,r=+q('#f-r').value||0;q('#f-tot').textContent=`${l+r} ml`;
+      const a=(l||r)?`G:${l}ml / D:${r}ml`:'',ta=q('#f-notes');
+      if(ta.value===lastAuto||ta.value==='')ta.value=a;lastAuto=a;
+    };
+    q('#f-l').addEventListener('input',upd);q('#f-r').addEventListener('input',upd);
+    q('#f-tot').textContent=`${(+q('#f-l').value||0)+(+q('#f-r').value||0)} ml`;
+    if(!e)lastAuto='';
+  }
+  ov.addEventListener('click',async ev=>{
+    const m=ev.target.closest('[data-m]');if(!m)return;
+    if(m.dataset.m==='del'&&e)return confirmDelete(e);
+    if(m.dataset.m!=='save')return;
+    const iso=readDt('f');if(!iso){toast('Date ou heure invalide');return}
+    const p={type,started_at:iso,ended_at:iso,notes:(q('#f-notes')&&q('#f-notes').value.trim())||null};
+    if(type==='couche')p.diaper_type=(q('#seg .on')||{dataset:{}}).dataset.v||'urine';
+    if(type==='biberon'){const ml=q('#f-ml').value;if(!ml||+ml<=0){toast('Indique une quantité');return}p.quantity_ml=+ml;p.label=q('#f-label').value}
+    if(type==='repas'){p.label=q('#f-label').value.trim()||null;p.quantity_g=q('#f-g').value?+q('#f-g').value:null}
+    if(type==='tirelait'){const l=+q('#f-l').value||0,r=+q('#f-r').value||0;if(l+r<=0){toast('Indique une quantité');return}p.left_ml=l;p.right_ml=r}
+    if(type==='medicament'){p.label=q('#f-label').value.trim()||null;if(!p.label){toast('Indique le médicament');return}}
+    m.disabled=true;const ok=await saveEvent(e,p);if(!ok)m.disabled=false;
+  });
+}
+
+function openSleep(e){
+  const T=TYPES.sommeil;
+  const body=`<div class="fr"><label>Début</label>${dtFields('f',e?e.started_at:nowISO())}</div>
+    <div class="fr"><label>Fin</label>${dtFields('g',e?e.ended_at:null)}<div class="hint" id="slHint"></div></div>
+    <div class="fr"><label>Notes</label><textarea id="f-notes" rows="2">${esc(e&&e.notes||'')}</textarea></div>`;
+  const running=e&&!e.ended_at;
+  const footer=`${e?'<button class="btn danger" data-m="del">🗑</button>':''}${running?'<button class="btn ghost" data-m="now">☀️ Réveil</button>':''}<button class="btn pri" data-m="save" id="slSave">${e?'Enregistrer':'Démarrer'}</button>`;
+  const ov=openModal({title:T.label,icon:T.icon,color:T.color,body,footer});
+  const q=s=>$(s,ov);
+  const upd=()=>{
+    const s=readDt('f'),en=readDt('g');
+    q('#slHint').textContent=!en?'Fin vide = bébé dort encore (chrono en cours).':(s&&en>s?`Durée : ${fmtHM(Date.parse(en)-Date.parse(s))}`:'');
+    q('#slSave').textContent=!en&&!e?'Démarrer':'Enregistrer';
+  };
+  ov.addEventListener('input',upd);upd();
+  async function save(){
+    const s=readDt('f'),en=readDt('g');
+    if(!s){toast('Début invalide');return}
+    if(en&&Date.parse(en)<=Date.parse(s)){toast('La fin doit être après le début');return}
+    const b=q('#slSave');b.disabled=true;
+    const ok=await saveEvent(e,{type:'sommeil',started_at:s,ended_at:en||null,notes:q('#f-notes').value.trim()||null});
+    if(!ok)b.disabled=false;
+  }
+  ov.addEventListener('click',ev=>{
+    const m=ev.target.closest('[data-m]');if(!m)return;
+    if(m.dataset.m==='del'&&e)confirmDelete(e);
+    else if(m.dataset.m==='save')save();
+    else if(m.dataset.m==='now'){const p=parisParts(new Date());q('#g-d').value=p.date;q('#g-t').value=p.time;upd();save()}
+  });
+}
+
+function openNursing(e){
+  const T=TYPES.allaitement;
+  let dr=e?{...e}:{id:null,started_at:nowISO(),ended_at:null,left_sec:0,right_sec:0,active_side:null,active_since:null,notes:''};
+  let used=false,lastAuto=null;
+  const body=`<div class="fr"><label>Début</label>${dtFields('f',dr.started_at)}</div>
+    <div class="timers" style="--c:${T.color}">${['left','right'].map(s=>`<div class="tm" id="tm-${s}">
+      <div class="tl2">${s==='left'?'Gauche':'Droite'}</div><div class="dg" id="dg-${s}">00:00</div>
+      <button type="button" class="tbtn" data-t="${s}">▶ Démarrer</button>
+      <div class="man"><input type="number" inputmode="numeric" min="0" id="mn-${s}" aria-label="Minutes ${s==='left'?'gauche':'droite'}"><span>min</span></div></div>`).join('')}</div>
+    <div class="tot">Total <b id="tot">0s</b></div>
+    <div class="fr"><label>Notes</label><textarea id="f-notes" rows="2"></textarea></div>`;
+  const footer=`${e?'<button class="btn danger" data-m="del">🗑</button>':''}<button class="btn pri" data-m="save">${e&&!e.ended_at?'Terminer':'Enregistrer'}</button>`;
+  let iv=null;
+  const ov=openModal({title:T.label,icon:T.icon,color:T.color,body,footer,cleanup:()=>clearInterval(iv)});
+  const q=s=>$(s,ov);
+  const autoNote=()=>{const c=nursingSecs(dr),p=[];if(c.l>0)p.push('G:'+noteFmt(c.l));if(c.r>0)p.push('D:'+noteFmt(c.r));return p.join(' / ')};
+  q('#f-notes').value=dr.notes||autoNote();
+  lastAuto=(!dr.notes||dr.notes===autoNote())?autoNote():null;
+  function paint(){
+    const c=nursingSecs(dr);
+    for(const s of['left','right']){
+      const sec=s==='left'?c.l:c.r,act=dr.active_side===s;
+      q('#dg-'+s).textContent=`${pad(Math.floor(sec/60))}:${pad(sec%60)}`;
+      q('#tm-'+s).classList.toggle('act',act);
+      q(`[data-t="${s}"]`).textContent=act?'⏸ Pause':(sec>0?'▶ Reprendre':'▶ Démarrer');
+      const mi=q('#mn-'+s);if(document.activeElement!==mi)mi.value=Math.floor(sec/60);
+    }
+    q('#tot').textContent=fmtMS(c.t);
+    const a=autoNote(),ta=q('#f-notes');
+    if(ta.value===lastAuto||ta.value==='')ta.value=a;
+    lastAuto=a;
+  }
+  paint();iv=setInterval(paint,500);
+  async function toggle(side){
+    const now=new Date(),c=nursingSecs(dr,now.getTime());
+    const patch={left_sec:c.l,right_sec:c.r};
+    if(dr.active_side===side){patch.active_side=null;patch.active_since=null}
+    else{patch.active_side=side;patch.active_since=now.toISOString();patch.ended_at=null}
+    used=true;
+    let row;
+    if(!dr.id)row=await insertEvent({type:'allaitement',started_at:readDt('f')||dr.started_at,ended_at:null,notes:q('#f-notes').value.trim()||null,...patch});
+    else row=await updateEvent(dr.id,patch);
+    if(!row)return;
+    dr=row;paint();loadAll();
+  }
+  ov.addEventListener('input',ev=>{
+    const m=ev.target.id&&ev.target.id.match(/^mn-(left|right)$/);
+    if(!m||dr.active_side===m[1])return;
+    dr[m[1]+'_sec']=Math.max(0,Math.round((+ev.target.value||0)*60));paint();
+  });
+  async function save(btn){
+    const iso=readDt('f');if(!iso){toast('Date ou heure invalide');return}
+    const c=nursingSecs(dr);
+    if(c.t<=0&&!dr.id){toast('Ajoute un temps ou lance un chrono');return}
+    const wasRunning=dr.id&&dr.ended_at==null;
+    const patch={started_at:iso,left_sec:c.l,right_sec:c.r,active_side:null,active_since:null,notes:q('#f-notes').value.trim()||null,
+      ended_at:(used||wasRunning)?new Date().toISOString():new Date(Date.parse(iso)+c.t*1000).toISOString()};
+    btn.disabled=true;
+    const ok=dr.id?await updateEvent(dr.id,patch):await insertEvent({type:'allaitement',...patch});
+    if(!ok){btn.disabled=false;return}
+    closeModal();await loadAll();
+  }
+  ov.addEventListener('click',async ev=>{
+    const t=ev.target.closest('[data-t]');
+    if(t){toggle(t.dataset.t);return}
+    const m=ev.target.closest('[data-m]');if(!m)return;
+    if(m.dataset.m==='save')save(m);
+    else if(m.dataset.m==='del'){
+      if(dr.id){if(!confirm('Supprimer cette activité ?'))return;if(await deleteEvent(dr.id)){closeModal();await loadAll()}}
+      else closeModal();
+    }
+  });
+}
+
+/* ───────── Enfants ───────── */
+function openChildMenu(){
+  const body=S.children.map(c=>`<button class="chrow${S.child&&c.id===S.child.id?' sel':''}" data-pick="${c.id}">${avatarHTML(c)}<span>${esc(c.name)}</span><span class="ed" data-edit="${c.id}">Modifier</span></button>`).join('')+
+    `<button class="btn ghost" data-m="add" style="width:100%;margin-top:4px">+ Ajouter un enfant</button>`;
+  const ov=openModal({title:'Mes enfants',body});
+  ov.addEventListener('click',async ev=>{
+    const ed=ev.target.closest('[data-edit]');
+    if(ed){openChildModal(S.children.find(c=>c.id===ed.dataset.edit));return}
+    const pk=ev.target.closest('[data-pick]');
+    if(pk){selectChild(pk.dataset.pick);closeModal();await loadAll();return}
+    if(ev.target.closest('[data-m="add"]'))openChildModal(null);
+  });
+}
+function selectChild(id){
+  S.child=S.children.find(c=>c.id===id)||S.children[0]||null;
+  if(S.child)store.set('bdb_child',S.child.id);
+}
+function openChildModal(c,opts){
+  opts=opts||{};
+  const welcome=!!opts.welcome;
+  const g=c&&c.gender||'';
+  const body=`${welcome?'<p class="info">Bienvenue ! Ajoute ton enfant pour commencer à suivre sa journée.</p>':''}
+    <div class="fr"><label>Prénom</label><input id="c-name" type="text" autocomplete="off" value="${esc(c&&c.name||'')}"></div>
+    <div class="fr"><label>Date de naissance</label><input id="c-birth" type="date" value="${esc(c&&c.birthdate||'')}" max="${todayStr()}"></div>
+    <div class="fr"><label>Sexe</label><div class="seg" id="c-gender" style="--c:var(--accent)">
+      ${[['fille','Fille'],['garcon','Garçon'],['','Non précisé']].map(([v,l])=>`<button type="button" data-v="${v}" class="${g===v?'on':''}">${l}</button>`).join('')}</div></div>
+    <div class="fr"><label>Photo (URL) — facultatif</label><input id="c-photo" type="url" placeholder="https://…" value="${esc(c&&c.photo_url||'')}"></div>
+    ${welcome?'<button class="lnk" data-m="logout" type="button">Se déconnecter</button>':''}`;
+  const footer=`${c?'<button class="btn danger" data-m="del">🗑 Supprimer</button>':''}<button class="btn pri" data-m="save">${welcome?'Commencer':'Enregistrer'}</button>`;
+  const ov=openModal({title:welcome?'Bienvenue 👋':(c?'Modifier l\'enfant':'Nouvel enfant'),body,footer,closable:!welcome});
+  ov.addEventListener('click',async ev=>{
+    const gb=ev.target.closest('#c-gender button');
+    if(gb){$$('#c-gender button',ov).forEach(x=>x.classList.toggle('on',x===gb));return}
+    const m=ev.target.closest('[data-m]');if(!m)return;
+    if(m.dataset.m==='logout'){await sb.auth.signOut();return}
+    if(m.dataset.m==='del'&&c){
+      if(!confirm(`Supprimer ${c.name} et toutes ses données ? Cette action est définitive.`))return;
+      const{error}=await sb.from('babydaybook_children').delete().eq('id',c.id);
+      if(error){dbErr(error);return}
+      closeModal();await loadChildren();
+      if(!S.children.length){S.child=null;showWelcome();return}
+      selectChild(S.child&&S.child.id!==c.id?S.child.id:S.children[0].id);await loadAll();return;
+    }
+    if(m.dataset.m!=='save')return;
+    const name=$('#c-name',ov).value.trim();if(!name){toast('Indique un prénom');return}
+    const row={name,birthdate:$('#c-birth',ov).value||null,gender:($('#c-gender .on',ov)||{dataset:{v:''}}).dataset.v||null,photo_url:$('#c-photo',ov).value.trim()||null};
+    m.disabled=true;
+    let res;
+    if(c)res=await sb.from('babydaybook_children').update(row).eq('id',c.id).select().single();
+    else res=await sb.from('babydaybook_children').insert(row).select().single();
+    if(res.error){dbErr(res.error);m.disabled=false;return}
+    closeModal();await loadChildren();selectChild(res.data.id);
+    $('#app').classList.remove('hide');await loadAll();
+  });
+}
+function showWelcome(){
+  $('#app').classList.add('hide');
+  openChildModal(null,{welcome:true});
+}
+
+/* ───────── Compte / installation ───────── */
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function openAccount(){
+  const body=`<p class="info">Connecté : <b style="color:var(--text)">${esc(S.user&&S.user.email||'')}</b></p>
+    <button class="btn ghost" data-m="install" style="width:100%;margin-bottom:10px">📲 Installer l'application</button>
+    <div id="iosHelp" class="info hide">Sur iPhone : touche <b>Partager</b> (carré avec une flèche) puis <b>Sur l'écran d'accueil</b>.</div>
+    <button class="btn danger" data-m="logout" style="width:100%">Se déconnecter</button>
+    <p class="hint" style="text-align:center;margin-top:16px">Baby Day Book · version ${esc(APP_VERSION.indexOf('__')===0?'dev':APP_VERSION)}</p>`;
+  const ov=openModal({title:'Compte',body});
+  ov.addEventListener('click',async ev=>{
+    const m=ev.target.closest('[data-m]');if(!m)return;
+    if(m.dataset.m==='logout'){closeModal();await sb.auth.signOut()}
+    if(m.dataset.m==='install'){
+      if(isStandalone()){toast("L'application est déjà installée");return}
+      if(S.deferredPrompt){S.deferredPrompt.prompt();S.deferredPrompt=null;return}
+      if(isIOS())$('#iosHelp',ov).classList.remove('hide');
+      else toast("Utilise le menu du navigateur › Installer l'application");
+    }
+  });
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();S.deferredPrompt=e});
+
+/* ───────── Événements de la page ───────── */
+async function quickAction(type){
+  const run=S.running.find(r=>r.type===type);
+  openEvent(type,run||null);
+}
+async function sideToggle(e,side){
+  const now=new Date(),c=nursingSecs(e,now.getTime()),patch={left_sec:c.l,right_sec:c.r};
+  if(e.active_side===side){patch.active_side=null;patch.active_since=null}
+  else{patch.active_side=side;patch.active_since=now.toISOString();patch.ended_at=null}
+  if(await updateEvent(e.id,patch))await loadAll();
+}
+async function finishEvent(e){
+  const patch={ended_at:new Date().toISOString()};
+  if(e.type==='allaitement'){const c=nursingSecs(e);patch.left_sec=c.l;patch.right_sec=c.r;patch.active_side=null;patch.active_since=null}
+  if(await updateEvent(e.id,patch))await loadAll();
+}
+const findEvent=id=>S.events.find(e=>e.id===id)||S.running.find(e=>e.id===id)||S.recent.find(e=>e.id===id);
+
+$('#view').addEventListener('click',async ev=>{
+  const el=ev.target.closest('[data-act]');if(!el)return;
+  const act=el.dataset.act,id=el.dataset.id,e=id?findEvent(id):null;
+  if(act==='qa')quickAction(el.dataset.type);
+  else if(act==='edit'&&e)openEvent(e.type,e);
+  else if(act==='del'&&e){ev.stopPropagation();if(confirm('Supprimer cette activité ?')&&await deleteEvent(e.id))await loadAll()}
+  else if(act==='side'&&e){ev.stopPropagation();sideToggle(e,el.dataset.side)}
+  else if(act==='finish'&&e){ev.stopPropagation();finishEvent(e)}
+  else if(act==='prev'){S.day=addDays(S.day,-1);await loadAll()}
+  else if(act==='next'&&S.day<todayStr()){S.day=addDays(S.day,1);await loadAll()}
+  else if(act==='today'){S.day=todayStr();await loadAll()}
+  else if(act==='toggleSummary'){S.summaryOpen=!S.summaryOpen;renderSummary()}
+});
+$('#view').addEventListener('change',async ev=>{
+  if(ev.target.id==='dayPick'&&ev.target.value){S.day=ev.target.value>todayStr()?todayStr():ev.target.value;await loadAll()}
+});
+$('#view').addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList.contains('row')){ev.preventDefault();ev.target.click()}});
+document.addEventListener('click',ev=>{
+  const el=ev.target.closest('header [data-act]');if(!el)return;
+  if(el.dataset.act==='childMenu')openChildMenu();
+  if(el.dataset.act==='account')openAccount();
+});
+// Balayage horizontal pour changer de jour
+(function(){
+  let x0=null,y0=null;const d=$('#daysec');
+  d.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  d.addEventListener('touchend',async e=>{
+    if(x0==null)return;
+    const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
+    if(Math.abs(dx)<90||Math.abs(dy)>45)return;
+    if(dx>0){S.day=addDays(S.day,-1);await loadAll()}
+    else if(S.day<todayStr()){S.day=addDays(S.day,1);await loadAll()}
+  },{passive:true});
+})();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.child&&!modalEl)loadAll()});
+setInterval(tick,1000);
+setInterval(()=>{if(S.child&&!document.hidden){renderQuick();renderTimeline()}},30000);
+
+/* ───────── Authentification ───────── */
+let signup=false;
+function authErr(m){
+  m=(m||'').toLowerCase();
+  if(m.includes('invalid login'))return'Email ou mot de passe incorrect.';
+  if(m.includes('already registered')||m.includes('already been registered'))return'Un compte existe déjà avec cet email.';
+  if(m.includes('at least')||(m.includes('password')&&m.includes('6')))return'Le mot de passe doit contenir au moins 6 caractères.';
+  if(m.includes('not confirmed'))return'Email non confirmé : désactive « Confirm email » dans Supabase (Authentication › Providers › Email).';
+  if(m.includes('valid email')||m.includes('invalid email'))return'Adresse email invalide.';
+  if(m.includes('rate limit'))return'Trop de tentatives, réessaie dans un instant.';
+  return'Erreur : '+m;
+}
+function setSignup(v){
+  signup=v;
+  $('#authBtn').textContent=v?'Créer mon compte':'Se connecter';
+  $('#authToggle').textContent=v?'Déjà un compte ? Se connecter':'Pas encore de compte ? Créer un compte';
+  $('#authSub').textContent=v?'Crée ton compte avec ton email et un mot de passe':'Connecte-toi pour retrouver la journée de bébé';
+  $('#pwd').autocomplete=v?'new-password':'current-password';
+}
+function authError(msg){const b=$('#authErr');b.textContent=msg||'';b.classList.toggle('hide',!msg)}
+$('#authToggle').addEventListener('click',()=>{authError('');setSignup(!signup)});
+$('#authForm').addEventListener('submit',async ev=>{
+  ev.preventDefault();authError('');
+  if(!sb){authError('Configuration Supabase manquante (clé publique non renseignée).');return}
+  const email=$('#email').value.trim(),password=$('#pwd').value,btn=$('#authBtn');
+  btn.disabled=true;
+  try{
+    let res;
+    if(signup){
+      res=await sb.auth.signUp({email,password});
+      if(!res.error&&!res.data.session)res=await sb.auth.signInWithPassword({email,password});
+    }else res=await sb.auth.signInWithPassword({email,password});
+    if(res.error)authError(authErr(res.error.message));
+  }catch(e){authError(authErr(e.message))}
+  btn.disabled=false;
+});
+
+function showAuth(){
+  closeModal();S.child=null;S.children=[];
+  $('#boot').classList.add('hide');$('#app').classList.add('hide');$('#auth').classList.remove('hide');
+  if(!sb)authError('Configuration Supabase manquante (clé publique non renseignée).');
+}
+async function bootApp(){
+  $('#auth').classList.add('hide');
+  if(!await loadChildren()){$('#boot').textContent='Impossible de charger les données.';$('#boot').classList.remove('hide');return}
+  $('#boot').classList.add('hide');
+  if(!S.children.length){showWelcome();return}
+  selectChild(store.get('bdb_child'));
+  $('#app').classList.remove('hide');
+  S.day=todayStr();
+  await loadAll();
+}
+let currentUid=null;
+async function route(user){
+  S.user=user;
+  if(!user){currentUid=null;showAuth();return}
+  if(currentUid===user.id)return;
+  currentUid=user.id;
+  await bootApp();
+}
+async function init(){
+  setSignup(false);
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if(!sb){showAuth();return}
+  sb.auth.onAuthStateChange((evt,session)=>{setTimeout(()=>route(session&&session.user||null),0)});
+  const{data}=await sb.auth.getSession();
+  await route(data.session&&data.session.user||null);
+}
+init();
+})();
+</script>
+</body>
+</html>
